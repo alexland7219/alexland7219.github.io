@@ -6,5 +6,6 @@ It displays all of the locations in most modes of gameplay. The spoiler log can 
 ## TODO
 
 Optional logic hints to be added. Locations will be outlined with green if they're accessible, orange if checkeable, blue if only accessible in complete darkness, or red if impossible with current items.
+Logic should assume Glitchless logic, non-Enemizer and no entrance shuffle.
 
 UI Improvements and Dark/Light mode toggle.
