@@ -1,0 +1,12 @@
+.spoiler-text {
+    display: none;
+}
+
+.hide-text {
+    color: white;
+}
+
+.small-badge {
+    font-size: 1rem;  /* Smaller font size */
+    padding: 0.25em 0.4em;  /* Adjust padding for a smaller look */
+}

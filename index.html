@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spoiler List with Done Button</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-dark.min.css" media="(prefers-color-scheme: dark)">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="zelda.css">
+    <input type="file" id="spoiler" accept=".txt" style="display: none;">
+    <script src="zelda.js" defer></script>
+</head>
+<body>
+
+<div class="container my-5">
+    <div id="topAlert" class="alert alert-success alert-dismissible fade d-none" role="alert"></div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">ALTTPR Tracker</h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" onclick="document.getElementById('spoiler').click()">Load spoiler</button>
+            <button class="btn btn-primary" onclick="toggleAvailableChecks()" id="availChecksBtn">Show available checks</button>
+            <button class="btn btn-warning" onclick="toggleAllSpoilers(this)">View all spoilers</button>
+        </div>
+    </div>
+  <!-- Two-column layout -->
+  <div class="row">
+    <!-- Left Column -->
+    <div class="col-md-6">
+      <!-- First section in left column -->
+      <div class="mb-4">
+        <h2 class="mb-4">Equipped</h2>                        
+        <div class="list-group">
+  
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Equipment Slot 1">
+            <span>Equipment Slot 1</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Equipment Slot 2">
+            <span>Equipment Slot 2</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Equipment Slot 3">
+            <span>Equipment Slot 3</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Light World</h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Sahasrahla's Hut - Left">
+        <span>Sahasrahla's Hut - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Sahasrahla's Hut - Middle">
+        <span>Sahasrahla's Hut - Middle</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Sahasrahla's Hut - Right">
+        <span>Sahasrahla's Hut - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Sahasrahla">
+        <span>Sahasrahla</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="King Zora">
+        <span>King Zora</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Potion Shop">
+        <span>Potion Shop</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Zora's Ledge">
+        <span>Zora's Ledge</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Waterfall Fairy - Left">
+        <span>Waterfall Fairy - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Waterfall Fairy - Right">
+        <span>Waterfall Fairy - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Master Sword Pedestal">
+        <span>Master Sword Pedestal</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="King's Tomb">
+        <span>King's Tomb</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Kakariko Tavern">
+        <span>Kakariko Tavern</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Chicken House">
+        <span>Chicken House</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Kakariko Well - Top">
+        <span>Kakariko Well - Top</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Kakariko Well - Left">
+        <span>Kakariko Well - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Kakariko Well - Middle">
+        <span>Kakariko Well - Middle</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Kakariko Well - Right">
+        <span>Kakariko Well - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Kakariko Well - Bottom">
+        <span>Kakariko Well - Bottom</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Blind's Hideout - Top">
+        <span>Blind's Hideout - Top</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Blind's Hideout - Left">
+        <span>Blind's Hideout - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Blind's Hideout - Right">
+        <span>Blind's Hideout - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Blind's Hideout - Far Left">
+        <span>Blind's Hideout - Far Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Blind's Hideout - Far Right">
+        <span>Blind's Hideout - Far Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Pegasus Rocks">
+        <span>Pegasus Rocks</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Bottle Merchant">
+        <span>Bottle Merchant</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Magic Bat">
+        <span>Magic Bat</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Sick Kid">
+        <span>Sick Kid</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Lost Woods Hideout">
+        <span>Lost Woods Hideout</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Lumberjack Tree">
+        <span>Lumberjack Tree</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Graveyard Ledge">
+        <span>Graveyard Ledge</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mushroom">
+        <span>Mushroom</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Floodgate Chest">
+        <span>Floodgate Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Link's House">
+        <span>Link's House</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Aginah's Cave">
+        <span>Aginah's Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mini Moldorm Cave - Far Left">
+        <span>Mini Moldorm Cave - Far Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mini Moldorm Cave - Left">
+        <span>Mini Moldorm Cave - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mini Moldorm Cave - Right">
+        <span>Mini Moldorm Cave - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mini Moldorm Cave - Far Right">
+        <span>Mini Moldorm Cave - Far Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Rod Cave">
+        <span>Ice Rod Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hobo">
+        <span>Hobo</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Bombos Tablet">
+        <span>Bombos Tablet</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Cave 45">
+        <span>Cave 45</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Checkerboard Cave">
+        <span>Checkerboard Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mini Moldorm Cave - NPC">
+        <span>Mini Moldorm Cave - NPC</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Library">
+        <span>Library</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Maze Race">
+        <span>Maze Race</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Ledge">
+        <span>Desert Ledge</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Lake Hylia Island">
+        <span>Lake Hylia Island</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Sunken Treasure">
+        <span>Sunken Treasure</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Flute Spot">
+        <span>Flute Spot</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Dark World</h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Superbunny Cave - Top">
+        <span>Superbunny Cave - Top</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Superbunny Cave - Bottom">
+        <span>Superbunny Cave - Bottom</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hookshot Cave - Top Right">
+        <span>Hookshot Cave - Top Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hookshot Cave - Top Left">
+        <span>Hookshot Cave - Top Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hookshot Cave - Bottom Left">
+        <span>Hookshot Cave - Bottom Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hookshot Cave - Bottom Right">
+        <span>Hookshot Cave - Bottom Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Spike Cave">
+        <span>Spike Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Catfish">
+        <span>Catfish</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Pyramid">
+        <span>Pyramid</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Pyramid Fairy - Left">
+        <span>Pyramid Fairy - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Pyramid Fairy - Right">
+        <span>Pyramid Fairy - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Brewery">
+        <span>Brewery</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="C-Shaped House">
+        <span>C-Shaped House</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Chest Game">
+        <span>Chest Game</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hammer Pegs">
+        <span>Hammer Pegs</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Bumper Cave">
+        <span>Bumper Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Blacksmith">
+        <span>Blacksmith</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Purple Chest">
+        <span>Purple Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hype Cave - Top">
+        <span>Hype Cave - Top</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hype Cave - Middle Right">
+        <span>Hype Cave - Middle Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hype Cave - Middle Left">
+        <span>Hype Cave - Middle Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hype Cave - Bottom">
+        <span>Hype Cave - Bottom</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Stumpy">
+        <span>Stumpy</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Hype Cave - NPC">
+        <span>Hype Cave - NPC</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Digging Game">
+        <span>Digging Game</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mire Shed - Left">
+        <span>Mire Shed - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mire Shed - Right">
+        <span>Mire Shed - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Skull Woods <span class="badge bg-primary ms-2 small-badge">D3</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Bridge Room">
+        <span>Bridge Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Pot Prison">
+        <span>Pot Prison</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Pinball Room">
+        <span>Pinball Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Skull Woods - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Ice Palace <span class="badge bg-primary ms-2 small-badge">D5</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Spike Room">
+        <span>Spike Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Freezor Chest">
+        <span>Freezor Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Iced T Room">
+        <span>Iced T Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ice Palace - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Turtle Rock <span class="badge bg-primary ms-2 small-badge">D7</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Chain Chomps">
+        <span>Chain Chomps</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Roller Room - Left">
+        <span>Roller Room - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Roller Room - Right">
+        <span>Roller Room - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Crystaroller Room">
+        <span>Crystaroller Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Eye Bridge - Bottom Left">
+        <span>Eye Bridge - Bottom Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Eye Bridge - Bottom Right">
+        <span>Eye Bridge - Bottom Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Eye Bridge - Top Left">
+        <span>Eye Bridge - Top Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Eye Bridge - Top Right">
+        <span>Eye Bridge - Top Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Special</h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Turtle Rock Medallion">
+        <span>Turtle Rock Medallion</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire Medallion">
+        <span>Misery Mire Medallion</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Waterfall Bottle">
+        <span>Waterfall Bottle</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Pyramid Bottle">
+        <span>Pyramid Bottle</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+
+</div>
+
+    <!-- Right Column -->
+    <div class="col-md-6">
+      <!-- First section in right column -->
+      <div class="mb-4">
+        <h2 class="mb-4">Hyrule Castle<span class="badge bg-primary ms-2 small-badge">H2</span></h2>                        
+        <div class="list-group">
+  
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Sanctuary">
+            <span>Sanctuary</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Sewers - Secret Room - Left">
+            <span>Sewers - Secret Room - Left</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Sewers - Secret Room - Middle">
+            <span>Sewers - Secret Room - Middle</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Sewers - Secret Room - Right">
+            <span>Sewers - Secret Room - Right</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Sewers - Dark Cross">
+            <span>Sewers - Dark Cross</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Hyrule Castle - Boomerang Chest">
+            <span>Hyrule Castle - Boomerang Chest</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Hyrule Castle - Map Chest">
+            <span>Hyrule Castle - Map Chest</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Hyrule Castle - Zelda's Cell">
+            <span>Hyrule Castle - Zelda's Cell</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Link's Uncle">
+            <span>Link's Uncle</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+   <li class="list-group-item d-flex justify-content-between align-items-center" name="Secret Passage">
+            <span>Secret Passage</span>
+            <div>
+                <span class="spoiler-text"></span>
+                <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+                <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+            </div>
+      </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Eastern Palace <span class="badge bg-primary ms-2 small-badge">P1</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Eastern Palace - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Eastern Palace - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Eastern Palace - Cannonball Chest">
+        <span>Cannonball Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Eastern Palace - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Eastern Palace - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Eastern Palace - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Eastern Palace - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Desert Palace <span class="badge bg-primary ms-2 small-badge">P2</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Palace - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Palace - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Palace - Torch">
+        <span>Torch</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Palace - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Palace - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Palace - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Desert Palace - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Death Mountain</h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Old Man">
+        <span>Old Man</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Spectacle Rock Cave">
+        <span>Spectacle Rock Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ether Tablet">
+        <span>Ether Tablet</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Spectacle Rock">
+        <span>Spectacle Rock</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Spiral Cave">
+        <span>Spiral Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Mimic Cave">
+        <span>Mimic Cave</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Paradox Cave Lower - Far Left">
+        <span>Paradox Cave Lower - Far Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Paradox Cave Lower - Left">
+        <span>Paradox Cave Lower - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Paradox Cave Lower - Right">
+        <span>Paradox Cave Lower - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Paradox Cave Lower - Far Right">
+        <span>Paradox Cave Lower - Far Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Paradox Cave Lower - Middle">
+        <span>Paradox Cave Lower - Middle</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Paradox Cave Upper - Left">
+        <span>Paradox Cave Upper - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Paradox Cave Upper - Right">
+        <span>Paradox Cave Upper - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Floating Island">
+        <span>Floating Island</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Tower Of Hera <span class="badge bg-primary ms-2 small-badge">P3</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Tower of Hera - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Tower of Hera - Basement Cage">
+        <span>Basement Cage</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Tower of Hera - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Tower of Hera - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Tower of Hera - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Tower of Hera - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Tower of Hera - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Castle Tower <span class="badge bg-primary ms-2 small-badge">A1</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Castle Tower - Room 03">
+        <span>Room 03</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Castle Tower - Dark Maze">
+        <span>Dark Maze</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Dark Palace <span class="badge bg-primary ms-2 small-badge">D1</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Shooter Room">
+        <span>Shooter Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - The Arena - Ledge">
+        <span>The Arena - Ledge</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - The Arena - Bridge">
+        <span>The Arena - Bridge</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Stalfos Basement">
+        <span>Stalfos Basement</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Harmless Hellway">
+        <span>Harmless Hellway</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Dark Basement - Left">
+        <span>Dark Basement - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Dark Basement - Right">
+        <span>Dark Basement - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Dark Maze - Top">
+        <span>Dark Maze - Top</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Dark Maze - Bottom">
+        <span>Dark Maze - Bottom</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Palace of Darkness - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Swamp Palace <span class="badge bg-primary ms-2 small-badge">D2</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Entrance">
+        <span>Entrance</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - West Chest">
+        <span>West Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Flooded Room - Left">
+        <span>Flooded Room - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Flooded Room - Right">
+        <span>Flooded Room - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Waterfall Room">
+        <span>Waterfall Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Swamp Palace - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Thieves' Town <span class="badge bg-primary ms-2 small-badge">D4</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Attic">
+        <span>Attic</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Ambush Chest">
+        <span>Ambush Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Blind's Cell">
+        <span>Blind's Cell</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Thieves' Town - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Misery Mire <span class="badge bg-primary ms-2 small-badge">D6</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Main Lobby">
+        <span>Main Lobby</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Compass Chest">
+        <span>Compass Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Bridge Chest">
+        <span>Bridge Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Spike Chest">
+        <span>Spike Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Boss">
+        <span>Boss</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Misery Mire - Prize">
+        <span>Prize</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+<div class="mb-4">
+    <h2 class="mb-4">Ganon's Tower <span class="badge bg-primary ms-2 small-badge">A2</span></h2>                        
+    <div class="list-group">
+
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Bob's Torch">
+        <span>Bob's Torch</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - DMs Room - Top Left">
+        <span>DMs Room - Top Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - DMs Room - Top Right">
+        <span>DMs Room - Top Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - DMs Room - Bottom Left">
+        <span>DMs Room - Bottom Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - DMs Room - Bottom Right">
+        <span>DMs Room - Bottom Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Randomizer Room - Top Left">
+        <span>Randomizer Room - Top Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Randomizer Room - Top Right">
+        <span>Randomizer Room - Top Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Randomizer Room - Bottom Left">
+        <span>Randomizer Room - Bottom Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Randomizer Room - Bottom Right">
+        <span>Randomizer Room - Bottom Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Firesnake Room">
+        <span>Firesnake Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Map Chest">
+        <span>Map Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Big Chest">
+        <span>Big Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Hope Room - Left">
+        <span>Hope Room - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Hope Room - Right">
+        <span>Hope Room - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Bob's Chest">
+        <span>Bob's Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Tile Room">
+        <span>Tile Room</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Compass Room - Top Left">
+        <span>Compass Room - Top Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Compass Room - Top Right">
+        <span>Compass Room - Top Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Compass Room - Bottom Left">
+        <span>Compass Room - Bottom Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Compass Room - Bottom Right">
+        <span>Compass Room - Bottom Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Big Key Chest">
+        <span>Big Key Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Big Key Room - Left">
+        <span>Big Key Room - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Big Key Room - Right">
+        <span>Big Key Room - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Mini Helmasaur Room - Left">
+        <span>Mini Helmasaur Room - Left</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Mini Helmasaur Room - Right">
+        <span>Mini Helmasaur Room - Right</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Pre-Moldorm Chest">
+        <span>Pre-Moldorm Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+<li class="list-group-item d-flex justify-content-between align-items-center" name="Ganon's Tower - Moldorm Chest">
+        <span>Moldorm Chest</span>
+        <div>
+            <span class="spoiler-text"></span>
+            <button class="btn btn-primary btn-sm mx-1" onclick="toggleSpoiler(this)">View Spoiler</button>
+            <button class="btn btn-success btn-sm" onclick="markDone(this)">Done</button>
+        </div>
+  </li>
+</div>
+</div>
+
+</div>
+  </div>    
+</div>
+</body>
+</html>
