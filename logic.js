@@ -5,7 +5,9 @@ const progressionMap = {
     "progressive_glove": ["power_glove", "titans_mitt"],
     "progressive_sword": ["fighters_sword", "master_sword", "tempered_sword", "golden_sword"],
     "progressive_armor": ["blue_mail", "red_mail"],
-    "progressive_shield": ["fighters_shield", "red_shield", "mirror_shield"]
+    "progressive_shield": ["fighters_shield", "red_shield", "mirror_shield"],
+    "progressive_bow": ["normal_bow", "silver_bow"],
+    "bottle": ["bottle_one", "bottle_two"]
 };
 
 
@@ -29,12 +31,14 @@ function checkProgression(item, isAdding) {
     if (!progressionMap[item]) return item;
 
     const currentItems = progressionMap[item];
-    let currentIndex = currentItems.findIndex(level => itemList.includes(level));
+    let currentIndex = currentItems.findLastIndex(level => itemList.includes(level));
 
+    console.log(currentIndex)
     if (isAdding) {
-        return currentIndex < currentItems.length - 1 ? currentItems[currentIndex + 1] : currentItems[currentIndex];
+        const res = currentIndex < currentItems.length - 1 ? currentItems[currentIndex + 1] : currentItems[currentIndex];
+        return res;
     } else {
-        return currentIndex > 0 ? currentItems[currentIndex - 1] : currentItems[0];
+        return currentItems[currentIndex];
     }
 }
 

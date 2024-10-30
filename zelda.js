@@ -126,7 +126,7 @@ function trimRedundantDescription(location) {
     ]
 
     for (let prefix of uselessPrefixes){
-        if (location.startsWith(prefix)){
+        if (location.startsWith(prefix + " -")){
             return location.slice(prefix.length + 3)
         }
     }
@@ -216,7 +216,7 @@ function markDone(button) {
         button.textContent = "Done";
         button.classList.add("btn-success");
         button.classList.remove("btn-danger");
-        toggleSpoiler(firstButton, 2)
+        //toggleSpoiler(firstButton, 2)
 
         removeItem(listItem.getElementsByClassName('spoiler-text')[0].textContent)
     }

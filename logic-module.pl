@@ -5,6 +5,8 @@ avail(equipment_slot_1).
 avail(equipment_slot_2).
 avail(equipment_slot_3).
 
+% LOCATIONS IN LIGHT WORLD
+
 avail(sahasrahlas_hut___left).
 avail(sahasrahlas_hut___middle).
 avail(sahasrahlas_hut___right).
@@ -23,7 +25,8 @@ location(waterfall_fairy___right) :- have(flippers).
 
 avail(master_sword_pedestal) :- have(pendant_of_wisdom), have(pendant_of_courage), have(pendant_of_power).
 
-%% avail(kings_tomb) :- (have(titans_mitt); have(mirror)), have(pegasus_boots).
+avail(kings_tomb) :- have(pegasus_boots), have(titans_mitt).
+avail(kings_tomb) :- have(pegasus_boots), can_access(dark_world_west), have(magic_mirror).
 
 avail(kakariko_tavern).
 avail(chicken_house).
@@ -43,9 +46,10 @@ avail(pegasus_rocks) :- have(pegasus_boots).
 
 avail(bottle_merchant).
 
-%%location(magic_bat).
+avail(magic_bat) :- have(powder), have(hammer).
+avail(magic_bat) :- have(powder), have(titans_mitt), have(magic_mirror).
 
-avail(sick_kid) :- have(bottle).
+avail(sick_kid) :- have(bottle_one).
 avail(sick_kid) :- have(bottle_with_gold_bee).
 avail(sick_kid) :- have(bottle_with_blue_potion).
 avail(sick_kid) :- have(bottle_with_green_potion).
@@ -53,11 +57,11 @@ avail(sick_kid) :- have(bottle_with_red_potion).
 
 avail(lost_woods_hideout).
 
-%%location(lumberjack_tree).
-%%location(graveyard_ledge).
+avail(lumberjack_tree) :- have(aganhim), have(pegasus_boots).
+
+avail(graveyard_ledge) :- have(magic_mirror), can_access(dark_world_west).
 
 avail(mushroom).
-
 avail(floodgate_chest).
 avail(links_house).
 avail(aginahs_cave).
@@ -65,58 +69,90 @@ avail(mini_moldorm_cave___far_left).
 avail(mini_moldorm_cave___left).
 avail(mini_moldorm_cave___right).
 avail(mini_moldorm_cave___far_right).
+avail(mini_moldorm_cave___npc).
+
 avail(ice_rod_cave).
 
 avail(hobo) :- have(flippers).
 
-%%location(bombos_tablet).
-%%location(cave_45).
-%%location(checkerboard_cave).
-avail(mini_moldorm_cave___npc).
+avail(bombos_tablet) :- have(magic_mirror), have(master_sword), have(book_of_mudora), can_access(dark_world_west).
+avail(cave_45) :- have(magic_mirror), can_access(dark_world_west).
+
+avail(checkerboard_cave) :- have(magic_mirror), can_access(dark_world_mire).
 avail(library) :- have(pegasus_boots).
-%%location(maze_race).
-%%location(desert_ledge).
-%%location(lake_hylia_island).
+avail(maze_race).
+
+avail(desert_ledge) :- can_access(desert_palace).
+
+avail(lake_hylia_island) :- have(magic_mirror), have(flippers), can_access(dark_world_east).
+avail(lake_hylia_island) :- have(magic_mirror), have(flippers), can_access(dark_world_west).
+
 avail(sunken_treasure).
-%%location(flute_spot).
-%%location(sanctuary).
-%%location(sewers___secret_room___left).
-%%location(sewers___secret_room___middle).
-%%location(sewers___secret_room___right).
-%%location(sewers___dark_cross).
-%%location(hyrule_castle___boomerang_chest).
-%%location(hyrule_castle___map_chest).
-%%location(hyrule_castle___zeldas_cell).
-%%location(links_uncle).
-%%location(secret_passage).
-%%location(eastern_palace___compass_chest).
-%%location(eastern_palace___big_chest).
-%%location(eastern_palace___cannonball_chest).
-%%location(eastern_palace___big_key_chest).
-%%location(eastern_palace___map_chest).
-%%location(eastern_palace___boss).
-%%location(eastern_palace___prize).
-%%location(desert_palace___big_chest).
-%%location(desert_palace___map_chest).
-%%location(desert_palace___torch).
-%%location(desert_palace___big_key_chest).
-%%location(desert_palace___compass_chest).
-%%location(desert_palace___boss).
-%%location(desert_palace___prize).
-%%location(old_man).
-%%location(spectacle_rock_cave).
-%%location(ether_tablet).
-%%location(spectacle_rock).
-%%location(spiral_cave).
-%%location(mimic_cave).
-%%location(paradox_cave_lower___far_left).
-%%location(paradox_cave_lower___left).
-%%location(paradox_cave_lower___right).
-%%location(paradox_cave_lower___far_right).
-%%location(paradox_cave_lower___middle).
-%%location(paradox_cave_upper___left).
-%%location(paradox_cave_upper___right).
-%%location(floating_island).
+avail(flute_spot) :- have(shovel).
+
+% LOCATIONS IN HYRULE CASTLE
+
+avail(sanctuary).
+
+avail(sewers___secret_room___left) :- (have(lamp) ; have(power_glove)).
+avail(sewers___secret_room___middle) :- (have(lamp) ; have(power_glove)).
+avail(sewers___secret_room___right) :- (have(lamp) ; have(power_glove)).
+avail(sewers___dark_cross) :- have(lamp).
+
+avail(hyrule_castle___boomerang_chest).
+avail(hyrule_castle___map_chest).
+avail(hyrule_castle___zeldas_cell).
+avail(links_uncle).
+avail(secret_passage).
+
+%% LOCATIONS IN EASTERN PALACE
+
+avail(eastern_palace___compass_chest).
+avail(eastern_palace___big_chest) :- have(big_key_p1).
+avail(eastern_palace___cannonball_chest).
+avail(eastern_palace___big_key_chest) :- have(lamp).
+avail(eastern_palace___map_chest).
+avail(eastern_palace___boss) :- have(lamp), have(normal_bow), have(big_key_p1).
+avail(eastern_palace___prize) :- avail(eastern_palace___boss).
+
+%% LOCATIONS IN DESERT PALACE
+
+avail(desert_palace___map_chest) :- can_access(desert_palace).
+avail(desert_palace___torch) :- can_access(desert_palace), have(pegasus_boots).
+avail(desert_palace___compass_chest) :- can_access(desert_palace), have(key_p2).
+avail(desert_palace___big_key_chest) :- can_access(desert_palace), have(key_p2).
+avail(desert_palace___big_chest) :- can_access(desert_palace), have(big_key_p2).
+
+avail(desert_palace___boss) :- can_access(desert_palace), have(power_glove), have(big_key_p2), have(lamp).
+avail(desert_palace___boss) :- can_access(desert_palace), have(power_glove), have(big_key_p2), have(fire_rod).
+
+avail(desert_palace___prize) :- avail(desert_palace___boss).
+
+%% LOCATIONS IN DEATH MOUNTAIN
+
+avail(old_man) :- can_access(death_mountain), have(lamp).
+avail(spectacle_rock_cave) :- can_access(death_mountain).
+
+avail(ether_tablet) :- can_access(death_mountain), have(book_of_mudora), have(master_sword), have(magic_mirror).
+avail(ether_tablet) :- can_access(death_mountain), have(book_of_mudora), have(master_sword), have(hookshot), have(hammer).
+
+avail(spectacle_rock) :- can_access(death_mountain), have(magic_mirror).
+
+avail(mimic_cave) :- can_access(turtle_rock), have(magic_mirror).
+
+avail(spiral_cave) :- can_access(east_death_mountain).
+avail(paradox_cave_lower___far_left) :- can_access(east_death_mountain).
+avail(paradox_cave_lower___left) :- can_access(east_death_mountain).
+avail(paradox_cave_lower___right) :- can_access(east_death_mountain).
+avail(paradox_cave_lower___far_right) :- can_access(east_death_mountain).
+avail(paradox_cave_lower___middle) :- can_access(east_death_mountain).
+avail(paradox_cave_upper___left) :- can_access(east_death_mountain).
+avail(paradox_cave_upper___right) :- can_access(east_death_mountain).
+
+avail(floating_island) :- can_access(east_death_mountain), have(magic_mirror), have(titans_mitt).
+
+
+
 %%location(tower_of_hera___big_key_chest).
 %%location(tower_of_hera___basement_cage).
 %%location(tower_of_hera___map_chest).
@@ -260,8 +296,44 @@ avail(sunken_treasure).
 %%location(waterfall_bottle).
 %%location(pyramid_bottle).
 
+%% SECTIONS FROM LIGHT WORLD
+can_access(tower_of_hera) :- can_access(death_mountain), have(magic_mirror).
+can_access(tower_of_hera) :- can_access(death_mountain), have(hookshot), have(hammer).
+
+can_access(castle_tower) :- have(master_sword).
+can_access(castle_tower) :- have(cape).
+
+can_access(death_mountain) :- have(ocarina_inactive).
+can_access(death_mountain) :- have(power_glove), have(lamp).
+
+can_access(east_death_mountain) :- can_access(death_mountain), have(hookshot).
+can_access(east_death_mountain) :- can_access(death_mountain), have(magic_mirror), have(hammer).
+
+can_access(desert_palace) :- have(book_of_mudora).
+can_access(desert_palace) :- can_access(dark_world_mire), have(magic_mirror).
+
+%% SECTIONS FROM DARK WORLD
+can_access(dark_world_east) :- have(aganhim).
+can_access(dark_world_east) :- have(power_glove), have(hammer).
+can_access(dark_world_east) :- have(titans_mitt), have(flippers).
+
+can_access(dark_world_west) :- have(power_glove), have(hammer).
+can_access(dark_world_west) :- have(titans_mitt).
+can_access(dark_world_west) :- have(aganhim), have(hookshot), (have(flippers) ; have(power_glove) ; have(hammer)).
+
+can_access(dark_world_south) :- have(power_glove), have(hammer).
+can_access(dark_world_south) :- have(titans_mitt).
+can_access(dark_world_south) :- have(aganhim), have(hammer).
+can_access(dark_world_south) :- have(aganhim), have(hookshot), (have(flippers) ; have(power_glove)).
+
+can_access(dark_world_mire) :- have(ocarina_inactive), have(titans_mitt).
+
+can_access(dark_world_death_mountain) :- can_access(death_mountain).    
+%%can_access(dark_world_death_mountain).
+
 have(_) :- false.
 avail(_) :- false.
+can_access(_) :- false.
 
 % Subtracts two lists
 subtract([], _, []).
