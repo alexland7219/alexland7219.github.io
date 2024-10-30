@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 const list_item = document.createElement("li")
                 list_item.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center")
-                list_item.id = locname
+                list_item.id = prologAtom(locname)
 
                 const span = document.createElement("span")
                 span.textContent = trimRedundantDescription(locname)
@@ -208,6 +208,8 @@ function markDone(button) {
         button.classList.remove("btn-success");
         button.classList.add("btn-danger");
         toggleSpoiler(firstButton, 1)
+
+        addItem(listItem.getElementsByClassName('spoiler-text')[0].textContent)
     
     } else {
         listItem.classList.remove("bg-success", "text-white");
@@ -220,20 +222,21 @@ function markDone(button) {
 
 }
 
-
-function toggleAvailableChecks()
+function toggleAvailableChecks(btnElem)
 {
-    const btnElem = document.getElementById("availChecksBtn");
     if (btnElem.classList.contains("active"))
     {
         // Already active
         btnElem.textContent = "Show available checks";
         btnElem.classList.remove("active");
+
+        clearAvail()
     }
     else {
         btnElem.textContent = "Hide available checks";
         btnElem.classList.add("active");
     
+        refreshAvail()
     }
 }
 
@@ -265,7 +268,6 @@ document.getElementById('spoiler').addEventListener('change', function(event) {
     showAlert("Spoiler log loaded successfully!");
 });
 
-// Example function to process the JSON data
 function processJsonData(data) {
 
     for (section in data){
@@ -273,7 +275,7 @@ function processJsonData(data) {
 
         for (loc in data[section]){
             // location
-            const item = document.getElementById(loc.split(':')[0]);
+            const item = document.getElementById(prologAtom(loc.split(':')[0]));
             // load spoiler
             const spoilerText = item.getElementsByClassName('spoiler-text')[0];
             spoilerText.textContent = data[section][loc].split(':')[0].replace(/([A-Z])/g, ' $1');

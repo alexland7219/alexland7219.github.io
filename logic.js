@@ -1,46 +1,48 @@
-var session = pl.create()
+var session;
 
-session.consult("                   \
-    % load lists module                          \
-    :- use_module(library(lists)).               \
-                                                 \
-    % fruit/1                                    \
-    fruit(apple). fruit(pear). fruit(banana).    \
-                                                 \
-    % fruits_in/2                                \
-    fruits_in(Xs, X) :- member(X, Xs), fruit(X). \
-", {
-  success: function () {
-    session.query("fruits_in([carrot, apple, banana, broccoli], X).", {
-        success: function (goal) {
-            session.answer({
-                success: function (goal) {
-                  console.log(goal); // {X/apple}
-                  session.answer({
-                    success: function (goal) {
-                      console.log(goal); // {X/banana}
-                    },
-                    // error, fail, limit
-                  });
-                },
-                error: function (err) {
-                  /* Uncaught error */
-                },
-                fail: function () {
-                  /* No more answers */
-                },
-                limit: function () {
-                  /* Limit exceeded */
-                },
-              });        },
-        error: function (err) {
-          /* Error parsing goal */
-        },
-      });
-      },
-  error: function (err) {
-    /* Error parsing program */
-  },
-});
+document.addEventListener("DOMContentLoaded", async () => {
 
+    session = pl.create();
 
+    var program = await fetch("logic-module.pl")
+    var progText = await program.text();
+
+    session.consult(progText)
+})
+
+function prologAtom(str) {
+    const ret = str.toLowerCase().replace(/[\s-]/g, '_').replace(/['"]/g, '')
+    if (ret.startsWith("_")) return ret.slice(1)
+    return ret
+}
+
+function addItem(item) {
+    var itemname = prologAtom(item)
+    session.consult(`have(${itemname}).`, {reconsult: true})
+
+    refreshAvail()
+}
+
+function refreshAvail() {
+
+    session.query(`avail(X).`)
+    session.answers(x => {
+        const ans = pl.format_answer(x)
+        console.log(ans)
+        if (ans == "false") return;
+
+        const id = ans.split(" = ")[1] // Remove 'X = '
+        
+        const elem = document.getElementById(id);
+        elem.classList.add("list-group-item-success")
+    }, 250)
+
+}
+
+function clearAvail() {
+    const locs = document.querySelectorAll('li.list-group-item-success');
+
+    locs.forEach((loc) => {
+        loc.classList.remove("list-group-item-success")
+    });
+}
