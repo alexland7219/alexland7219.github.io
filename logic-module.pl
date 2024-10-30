@@ -1,58 +1,49 @@
-%% Locations 
+:- use_module(library(lists)).
+:- dynamic(have/1).
 
 avail(equipment_slot_1).
 avail(equipment_slot_2).
 avail(equipment_slot_3).
 
-%%location(sahasrahlas_hut___left).
-%%location(sahasrahlas_hut___middle).
-%%location(sahasrahlas_hut___right).
-%%location(sahasrahla).
-%%location(king_zora).
-%%location(potion_shop).
-%%location(zoras_ledge).
-%%location(waterfall_fairy___left).
-%%location(waterfall_fairy___right).
+avail(sahasrahlas_hut___left).
+avail(sahasrahlas_hut___middle).
+avail(sahasrahlas_hut___right).
 
-%%location(master_sword_pedestal).
+avail(sahasrahla) :- have(pendant_of_courage).
+
+avail(king_zora) :- have(flippers).
+avail(king_zora) :- have(power_glove).
+
+avail(potion_shop) :- have(mushroom).
+
+avail(zoras_ledge) :- have(flippers).
+
+location(waterfall_fairy___left) :- have(flippers).
+location(waterfall_fairy___right) :- have(flippers).
+
 avail(master_sword_pedestal) :- have(pendant_of_wisdom), have(pendant_of_courage), have(pendant_of_power).
 
-%%location(kings_tomb).
+%% avail(kings_tomb) :- (have(titans_mitt); have(mirror)), have(pegasus_boots).
 
-%%location(kakariko_tavern).
 avail(kakariko_tavern).
-%%location(chicken_house).
 avail(chicken_house).
-%%location(kakariko_well___top).
 avail(kakariko_well___top).
-%%location(kakariko_well___left).
 avail(kakariko_well___left).
-%%location(kakariko_well___middle).
 avail(kakariko_well___middle).
-%%location(kakariko_well___right).
 avail(kakariko_well___right).
-%%location(kakariko_well___bottom).
 avail(kakariko_well___bottom).
 
-%%location(blinds_hideout___top).
 avail(blinds_hideout___top).
-%%location(blinds_hideout___left).
 avail(blinds_hideout___left).
-%%location(blinds_hideout___right).
 avail(blinds_hideout___right).
-%%location(blinds_hideout___far_left).
 avail(blinds_hideout___far_left).
-%%location(blinds_hideout___far_right).
 avail(blinds_hideout___far_right).
 
-%%location(pegasus_rocks).
+avail(pegasus_rocks) :- have(pegasus_boots).
 
-%%location(bottle_merchant).
 avail(bottle_merchant).
 
 %%location(magic_bat).
-
-%%location(sick_kid).
 
 avail(sick_kid) :- have(bottle).
 avail(sick_kid) :- have(bottle_with_gold_bee).
@@ -60,33 +51,33 @@ avail(sick_kid) :- have(bottle_with_blue_potion).
 avail(sick_kid) :- have(bottle_with_green_potion).
 avail(sick_kid) :- have(bottle_with_red_potion).
 
-%%location(lost_woods_hideout).
 avail(lost_woods_hideout).
 
 %%location(lumberjack_tree).
 %%location(graveyard_ledge).
 
-%%location(mushroom).
 avail(mushroom).
 
-%%location(floodgate_chest).
-%%location(links_house).
-%%location(aginahs_cave).
-%%location(mini_moldorm_cave___far_left).
-%%location(mini_moldorm_cave___left).
-%%location(mini_moldorm_cave___right).
-%%location(mini_moldorm_cave___far_right).
-%%location(ice_rod_cave).
-%%location(hobo).
+avail(floodgate_chest).
+avail(links_house).
+avail(aginahs_cave).
+avail(mini_moldorm_cave___far_left).
+avail(mini_moldorm_cave___left).
+avail(mini_moldorm_cave___right).
+avail(mini_moldorm_cave___far_right).
+avail(ice_rod_cave).
+
+avail(hobo) :- have(flippers).
+
 %%location(bombos_tablet).
 %%location(cave_45).
 %%location(checkerboard_cave).
-%%location(mini_moldorm_cave___npc).
-%%location(library).
+avail(mini_moldorm_cave___npc).
+avail(library) :- have(pegasus_boots).
 %%location(maze_race).
 %%location(desert_ledge).
 %%location(lake_hylia_island).
-%%location(sunken_treasure).
+avail(sunken_treasure).
 %%location(flute_spot).
 %%location(sanctuary).
 %%location(sewers___secret_room___left).
@@ -271,3 +262,22 @@ avail(mushroom).
 
 have(_) :- false.
 avail(_) :- false.
+
+% Subtracts two lists
+subtract([], _, []).
+subtract(A, [], A).
+subtract([A|XA], B, C) :-
+    member(A, B),
+    subtract(XA, B, C).
+
+subtract([A|XA], B, [A|C]) :-
+    \+ member(A, B),
+    subtract(XA, B, C).
+
+% Would be available locations if we had the item
+would_be_avail(Item, Unavailable) :-
+    findall(X, avail(X), AvailableBefore),
+    asserta(have(Item)),
+    findall(X, avail(X), AvailableAfter),
+    retract(have(Item)),
+    subtract(AvailableAfter, AvailableBefore, Unavailable).

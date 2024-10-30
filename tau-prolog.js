@@ -21,6 +21,8 @@
 	// VERSION
 	var version = { major: 0, minor: 3, patch: 4, status: "beta" };
 
+
+
 	// IO FILE SYSTEM
 	
 	// Virtual file
@@ -9586,3 +9588,2387 @@ var pl;
 	}
 
 })( pl );
+var pl;
+(function( pl ) {
+
+	var predicates = function() {
+		
+		return {
+			
+			// EVENTS
+			
+			// bind/4
+			"bind/4": function( thread, point, atom ) {
+				var elem = atom.args[0], type = atom.args[1], event = atom.args[2], goal = atom.args[3];
+				if( pl.type.is_variable( elem ) || pl.type.is_variable( type ) && pl.type.is_variable( goal ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( elem ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", elem, atom.indicator ) );
+				} else if( !pl.type.is_atom( type ) ) {
+					thread.throw_error( pl.error.type( "atom", type, atom.indicator ) );
+				} else if( !pl.type.is_variable( event ) && !pl.type.is_dom_event_object( event ) ) {
+					thread.throw_error( pl.error.type( "DOMEventObject", type, atom.indicator ) );
+				} else if( !pl.type.is_variable( goal ) ) {
+					var thread_ = new pl.type.Thread( thread.session );
+					var eventObject = new pl.type.DOMEvent( type.id );
+					var links = {};
+					if( pl.type.is_variable( event ) )
+						links[event.id] = eventObject;
+					var subs = new pl.type.Substitution( links );
+					var handler = function( e ) {
+						eventObject.event = e;
+						thread_.add_goal( goal.apply( subs ) );
+						thread_.answer( thread.__calls[0] );
+					};
+					events.add( elem.object, type.id, handler );
+					elem.object.tau_events = elem.object.tau_events === undefined ? {} : elem.object.tau_events;
+					if( elem.object.tau_events[type.id] === undefined )
+						elem.object.tau_events[type.id] = [];
+					elem.object.tau_events[type.id].push( {goal: goal, fn: handler} );
+					thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [eventObject, event] ) ), point.substitution, point )] );
+				} else {
+					var event = elem.object.tau_events ? elem.object.tau_events[type.id] : undefined;
+					if( event !== undefined ) {
+						var states = [];
+						for( var i = 0; i < event.length; i++ )
+							states.push( new pl.type.State( point.goal.replace( new pl.type.Term( "=", [goal, event[i].goal.rename(thread)] ) ), point.substitution, point ) );
+						thread.prepend( states );
+					}
+				}
+			},
+			
+			// unbind/2
+			"unbind/2": function( thread, point, atom ) {
+				var elem = atom.args[0], type = atom.args[1];
+				if( pl.type.is_variable( elem ) || pl.type.is_variable( type ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( elem ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", elem, atom.indicator ) );
+				} else if( !pl.type.is_atom( type ) ) {
+					thread.throw_error( pl.error.type( "atom", type, atom.indicator ) );
+				} else {
+					if( elem.object.tau_events && elem.object.tau_events[type.id] ) {
+						var event = elem.object.tau_events[type.id];
+						for( var i = 0; i < event.length; i++ ) {
+							events.remove( elem.object, type.id, event[i].fn );
+						}
+						delete elem.object.tau_events[type.id];
+					}
+					thread.success( point );
+				}
+			},
+			
+			// unbind/3
+			"unbind/3": function( thread, point, atom ) {
+				var elem = atom.args[0], type = atom.args[1], goal = atom.args[2];
+				if( pl.type.is_variable( elem ) || pl.type.is_variable( type ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( elem ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", elem, atom.indicator ) );
+				} else if( !pl.type.is_atom( type ) ) {
+					thread.throw_error( pl.error.type( "atom", type, atom.indicator ) );
+				} else if( !pl.type.is_variable( goal ) && !pl.type.is_term( goal ) ) {
+					thread.throw_error( pl.error.type( "term", goal, atom.indicator ) );
+				} else if( !pl.type.is_variable( goal ) ) {
+					if( elem.object.tau_events && elem.object.tau_events[type.id] ) {
+						var event = elem.object.tau_events[type.id];
+						var newevents = [];
+						for( var i = 0; i < event.length; i++ ) {
+							if( pl.unify( event[i].goal, goal ) !== null ) {
+								events.remove( elem.object, type.id, event[i].fn );
+							} else {
+								newevents.push( event[i] );
+							}
+						}
+						elem.object.tau_events[type.id] = newevents;
+					}
+					thread.success( point );
+				}
+			},
+			
+			// event_property/3
+			"event_property/3": function( thread, point, atom ) {
+				var event = atom.args[0], prop = atom.args[1], val = atom.args[2]
+				if( pl.type.is_variable( event ) || pl.type.is_variable( prop ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_event_object( event ) ) {
+					thread.throw_error( pl.error.type( "DOMEventObject", event, atom.indicator ) );
+				} else if( !pl.type.is_atom( prop ) ) {
+					thread.throw_error( pl.error.type( "atom", prop, atom.indicator ) );
+				} else if( !pl.type.is_variable( val ) && !pl.type.is_atomic( val ) ) {
+					thread.throw_error( pl.error.type( "atomic", val, atom.indicator ) );
+				} else {
+					if( event.event !== null && event.event[prop.id] ) {
+						var value = event.event[prop.id];
+						value = isNaN(value) ? new pl.type.Term( value, [] ) : new pl.type.Num( value );
+						thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [value, val] ) ), point.substitution, point )] );
+					}
+				}
+			},
+			
+			// prevent_default/1
+			"prevent_default/1": function( thread, point, atom ) {
+				var event = atom.args[0];
+				if( pl.type.is_variable( event ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_event_object( event ) ) {
+					thread.throw_error( pl.error.type( "eventObject", event, atom.indicator ) );
+				} else {
+					if( event.event !== null ) {
+						event.event.preventDefault();
+						thread.success( point );
+					}
+				}
+			},
+			
+			// EFFECTS
+			
+			// hide/1
+			"hide/1": function( thread, point, atom ) {
+				var element = atom.args[0];
+				if( pl.type.is_variable( element ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else {
+					var state = document.defaultView.getComputedStyle( element.object, "" ).display;
+					if( state !== undefined && state !== "none" )
+						element.object.tau_display = state;
+					element.object.style.display = "none";
+					thread.success( point );
+				}
+			},
+			
+			// show/1
+			"show/1": function( thread, point, atom ) {
+				var element = atom.args[0];
+				if( pl.type.is_variable( element ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else {
+					element.object.style.display = element.object.tau_display !== undefined ? element.object.tau_display : "block";
+					thread.success( point );
+				}
+			},
+			
+			// toggle/1
+			"toggle/1": [
+				new pl.type.Rule(new pl.type.Term("toggle", [new pl.type.Var("X")]), new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term(",", [new pl.type.Term("style", [new pl.type.Var("X"),new pl.type.Term("display", []),new pl.type.Var("Y")]),new pl.type.Term("=", [new pl.type.Var("Y"),new pl.type.Term("none", [])])]),new pl.type.Term("show", [new pl.type.Var("X")])]),new pl.type.Term("hide", [new pl.type.Var("X")])]))
+			],
+			
+			// DOM MANIPULATION
+
+			// document/1
+			"document/1": function( session, point, atom) {
+				var doc = atom.args[0];
+				var newdoc = new pl.type.DOM( document );
+				session.prepend( [new pl.type.State(
+					point.goal.replace(new pl.type.Term("=", [doc, newdoc])),
+					point.substitution,
+					point
+				)] );
+			},
+
+			// head/1
+			"head/1": function( session, point, atom) {
+				var head = atom.args[0];
+				var newhead = new pl.type.DOM( document.head );
+				session.prepend( [new pl.type.State(
+					point.goal.replace(new pl.type.Term("=", [head, newhead])),
+					point.substitution,
+					point
+				)] );
+			},
+
+			// body/1
+			"body/1": function( session, point, atom) {
+				var body = atom.args[0];
+				var newbody = new pl.type.DOM( document.body );
+				session.prepend( [new pl.type.State(
+					point.goal.replace(new pl.type.Term("=", [body, newbody])),
+					point.substitution,
+					point
+				)] );
+			},
+			
+			// get_by_id/2
+			"get_by_id/2": function( session, point, atom ) {
+				var id = atom.args[0], object = atom.args[1];
+				if( pl.type.is_variable( id ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_atom( id ) ) {
+					session.throw_error( pl.error.type( "atom", id, atom.indicator ) );
+				} else if( !pl.type.is_variable( object ) && !pl.type.is_dom_object( object ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", object, atom.indicator ) );
+				} else {
+					var element = document.getElementById( id.id );
+					if( element ) {
+						var html = new pl.type.DOM( element );
+						session.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [html, object] ) ), point.substitution, point )] );
+					}
+				}
+			},
+
+			// get_by_class/2
+			"get_by_class/2": [
+				new pl.type.Rule(new pl.type.Term("get_by_class", [new pl.type.Var("Class"),new pl.type.Var("Html")]), new pl.type.Term(",", [new pl.type.Term("document", [new pl.type.Var("D")]),new pl.type.Term("get_by_class", [new pl.type.Var("D"),new pl.type.Var("Class"),new pl.type.Var("Html")])]))
+			],
+			
+			// get_by_class/3
+			"get_by_class/3": function( session, point, atom ) {
+				var parent = atom.args[0], name = atom.args[1], object = atom.args[2];
+				if( pl.type.is_variable( parent ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( parent ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", parent, atom.indicator ) );
+				} else if( pl.type.is_variable( name ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_atom( name ) ) {
+					session.throw_error( pl.error.type( "atom", name, atom.indicator ) );
+				} else if( !pl.type.is_variable( object ) && !pl.type.is_dom_object( object ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", object, atom.indicator ) );
+				} else {
+					var elements = parent.object.getElementsByClassName( name.id );
+					if( elements ) {
+						var states = [];
+						for( var i = 0; i < elements.length; i++ ) {
+							var html = new pl.type.DOM( elements[i] );
+							states.push( new pl.type.State( point.goal.replace( new pl.type.Term( "=", [html, object] ) ), point.substitution, point ) );
+						}
+						session.prepend( states );
+					}
+				}
+			},
+
+			// get_by_tag/2
+			"get_by_tag/2": [
+				new pl.type.Rule(new pl.type.Term("get_by_tag", [new pl.type.Var("Tag"),new pl.type.Var("Html")]), new pl.type.Term(",", [new pl.type.Term("document", [new pl.type.Var("D")]),new pl.type.Term("get_by_tag", [new pl.type.Var("D"),new pl.type.Var("Tag"),new pl.type.Var("Html")])]))
+			],
+			
+			// get_by_tag/3
+			"get_by_tag/3": function( session, point, atom ) {
+				var parent = atom.args[0], tag = atom.args[1], object = atom.args[2];
+				if( pl.type.is_variable( parent ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( parent ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", parent, atom.indicator ) );
+				} else if( pl.type.is_variable( tag ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_atom( tag ) ) {
+					session.throw_error( pl.error.type( "atom", tag, atom.indicator ) );
+				} else if( !pl.type.is_variable( object ) && !pl.type.is_dom_object( object ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", object, atom.indicator ) );
+				} else {
+					var elements = parent.object.getElementsByTagName( tag.id );
+					if( elements ) {
+						var states = [];
+						for( var i = 0; i < elements.length; i++ ) {
+							var html = new pl.type.DOM( elements[i] );
+							states.push( new pl.type.State( point.goal.replace( new pl.type.Term( "=", [html, object] ) ), point.substitution, point ) );
+						}
+						session.prepend( states );
+					}
+				}
+			},
+
+			// get_by_name/2
+			"get_by_name/2": function( session, point, atom ) {
+				var name = atom.args[0], object = atom.args[1];
+				if( pl.type.is_variable( name ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_atom( name ) ) {
+					session.throw_error( pl.error.type( "atom", name, atom.indicator ) );
+				} else if( !pl.type.is_variable( object ) && !pl.type.is_dom_object( object ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", object, atom.indicator ) );
+				} else {
+					var elements = document.getElementsByName( name.id );
+					if( elements ) {
+						var states = [];
+						for( var i = 0; i < elements.length; i++ ) {
+							var html = new pl.type.DOM( elements[i] );
+							states.push( new pl.type.State( point.goal.replace( new pl.type.Term( "=", [html, object] ) ), point.substitution, point ) );
+						}
+						session.prepend( states );
+					}
+				}
+			},
+
+			// get_style/3
+			"get_style/3": function( session, point, atom ) {
+				var html = atom.args[0], property = atom.args[1], value = atom.args[2];
+				if( pl.type.is_variable( html ) || pl.type.is_variable( property ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", selector, atom.indicator ) );
+				} else if( !pl.type.is_atom( property ) ) {
+					session.throw_error( pl.error.type( "atom", property, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					var style = document.defaultView.getComputedStyle( html.object, "" )[property.id] || "";
+					if( style === '' && html.object.style[property.id] )
+						style = html.object.style[property.id];
+					var html_value = styleToProlog( style );
+					session.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [value, html_value] ) ), point.substitution, point )] );
+				}
+			},
+
+			// set_style/3
+			"set_style/3": function( session, point, atom ) {
+				var html = atom.args[0], property = atom.args[1], value = atom.args[2];
+				var styleValue = styleFromProlog( value );
+				var ground = pl.type.is_ground( value );
+				if( pl.type.is_variable( html ) || pl.type.is_variable( property ) || !ground ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", selector, atom.indicator ) );
+				} else if( !pl.type.is_atom( property ) ) {
+					session.throw_error( pl.error.type( "atom", property, atom.indicator ) );
+				} else if( styleValue === false ) {
+					session.throw_error( pl.error.domain( "style_value", value, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					html.object.style[property.id] = styleValue;
+					session.success( point );
+				}
+			},
+			
+			// style/3
+			"style/3": function( session, point, atom ) {
+				var html = atom.args[0], property = atom.args[1], value = atom.args[2];
+				var styleValue = styleFromProlog( value );
+				var ground = pl.type.is_ground( value );
+				if( pl.type.is_variable( html ) || pl.type.is_variable( property ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", html, atom.indicator ) );
+				} else if( !pl.type.is_atom( property ) ) {
+					session.throw_error( pl.error.type( "atom", property, atom.indicator ) );
+				} else if( !pl.type.is_variable( value ) && ground && styleValue === false ) {
+					session.throw_error( pl.error.domain( "style_value", value, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					if( !ground ) {
+						var style = document.defaultView.getComputedStyle( html.object, "" )[property.id] || "";
+						if( style === '' && html.object.style[property.id] )
+							style = html.object.style[property.id];
+						var html_value = styleToProlog( style );
+						session.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [value, html_value] ) ), point.substitution, point )] );
+					} else {
+						html.object.style[property.id] = styleValue;
+						session.success( point );
+					}
+				}
+			},
+
+			// get_attr/3
+			"get_attr/3": function( session, point, atom ) {
+				var html = atom.args[0], attr = atom.args[1], value = atom.args[2];
+				if( pl.type.is_variable( html ) || pl.type.is_variable( attr ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", selector, atom.indicator ) );
+				} else if( !pl.type.is_atom( attr ) ) {
+					session.throw_error( pl.error.type( "atom", attr, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					var html_value = attr.id === "value" ? new pl.type.Term(html.object.value) : styleToProlog(html.object.getAttribute(attr.id));
+					if( html_value !== null && html_value !== undefined )
+						session.prepend( [new pl.type.State(
+							point.goal.replace( new pl.type.Term( "=", [value, html_value] ) ),
+							point.substitution, point
+						)] );
+				}
+			},
+
+			// set_attr/3
+			"set_attr/3": function( session, point, atom ) {
+				var html = atom.args[0], attr = atom.args[1], value = atom.args[2];
+				var styleValue = styleFromProlog( value );
+				var ground = pl.type.is_ground( value );
+				if( pl.type.is_variable( html ) || pl.type.is_variable( attr ) || !ground ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", selector, atom.indicator ) );
+				} else if( !pl.type.is_atom( attr ) ) {
+					session.throw_error( pl.error.type( "atom", attr, atom.indicator ) );
+				} else if( styleValue === false ) {
+					session.throw_error( pl.error.domain( "attribute_value", value, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					if( attr.id === "value" ) {
+						html.object.value = styleValue;
+					} else {
+						html.object.setAttribute( attr.id, styleValue );
+					}
+					session.success( point );
+				}
+			},
+			
+			// attr/3
+			"attr/3": function( session, point, atom ) {
+				var html = atom.args[0], attr = atom.args[1], value = atom.args[2];
+				var styleValue = styleFromProlog( value );
+				var ground = pl.type.is_ground( value );
+				if( pl.type.is_variable( html ) || pl.type.is_variable( attr ) ) {
+					session.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", selector, atom.indicator ) );
+				} else if( !pl.type.is_atom( attr ) ) {
+					session.throw_error( pl.error.type( "atom", attr, atom.indicator ) );
+				} else if( !pl.type.is_variable( value ) && ground && styleValue === false ) {
+					session.throw_error( pl.error.domain( "attribute_value", value, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					if( !ground ) {
+						var html_value = attr.id === "value" ? new pl.type.Term(html.object.value) : styleToProlog(html.object.getAttribute(attr.id));
+						if( html_value !== null && html_value !== undefined )
+							session.prepend( [new pl.type.State(
+								point.goal.replace( new pl.type.Term( "=", [value, html_value] ) ),
+								point.substitution, point
+							)] );
+					} else {
+						if( attr.id === "value" ) {
+							html.object.value = styleValue;
+						} else {
+							html.object.setAttribute( attr.id, styleValue );
+						}
+						session.success( point );
+					}
+				}
+			},
+
+			// get_html/2
+			"get_html/2": function( thread, point, atom ) {
+				var html = atom.args[0], value = atom.args[1];
+				if( pl.type.is_variable( html ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", html, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					var inner = new pl.type.Term( html.object.innerHTML );
+					thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [inner, value] ) ), point.substitution, point )] );
+				}
+			},
+
+			// set_html/2
+			"set_html/2": function( thread, point, atom ) {
+				var html = atom.args[0], value = atom.args[1];
+				if( pl.type.is_variable( html ) || pl.type.is_variable( value ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( html ) ) {
+					session.throw_error( pl.error.type( "HTMLObject", html, atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					if( pl.type.is_atom( value ) )
+						html.object.innerHTML = value.id;
+					else
+						html.object.innerHTML = value.toString();
+					thread.success( point );
+				}
+			},
+			
+			// html/2
+			"html/2": function( thread, point, atom ) {
+				var html = atom.args[0], value = atom.args[1];
+				if( pl.type.is_variable( html ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else {
+					if( html.object === document ) return;
+					if( pl.type.is_variable( value ) ) {
+						var inner = new pl.type.Term( html.object.innerHTML );
+						thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [inner, value] ) ), point.substitution, point )] );
+					} else {
+						if( pl.type.is_atom( value ) )
+							html.object.innerHTML = value.id;
+						else
+							html.object.innerHTML = value.toString();
+						thread.success( point );
+					}
+				}
+			},
+			
+			// create/2
+			"create/2": function( thread, point, atom ) {
+				var tag = atom.args[0], element = atom.args[1];
+				if( pl.type.is_variable( tag ) && pl.type.is_variable( element ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_variable( tag ) && !pl.type.is_atom( tag ) ) {
+					thread.throw_error( pl.error.type( "atom", tag, atom.indicator ) );
+				} else if( !pl.type.is_variable( element ) && !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else if( pl.type.is_variable( element ) ) {
+					var node = new pl.type.DOM( document.createElement( tag.id ) );
+					thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [element, node] ) ), point.substitution, point )] );
+				} else if( pl.type.is_variable( element ) ) {
+					var node = new pl.type.DOM( document.createElement( tag.id.toLowerCase() ) );
+					thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [element, node] ) ), point.substitution, point )] );
+				} else if( pl.type.is_variable( tag ) ) {
+					var type = new pl.type.Term( element.object.nodeName.toLowerCase() );
+					thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [type, tag] ) ), point.substitution, point )] );
+				}
+			},
+			
+			// parent_of/2
+			"parent_of/2": function( thread, point, atom ) {
+				var child = atom.args[0], parent = atom.args[1];
+				if( pl.type.is_variable( parent ) && pl.type.is_variable( child ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_variable( parent ) && !pl.type.is_dom_object( parent ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", parent, atom.indicator ) );
+				} else if( !pl.type.is_variable( child ) && !pl.type.is_dom_object( child ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", child, atom.indicator ) );
+				} else if( pl.type.is_variable( child ) ) {
+					var children = parent.object.children;
+					var states = [];
+					for( var i = 0; i < children.length; i++ ) {
+						states.push( new pl.type.State( point.goal.replace( new pl.type.Term( "=", [child, new pl.type.DOM( children[i] )] ) ), point.substitution, point ) );
+					}
+					thread.prepend( states );
+				} else {
+					if( child.object.parentNode ) {
+						thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [parent, new pl.type.DOM( child.object.parentNode )] ) ), point.substitution, point )] );
+					}
+				}
+			},
+			
+			// sibling/2
+			"sibling/2": function( thread, point, atom ) {
+				var left = atom.args[0], right = atom.args[1];
+				if( pl.type.is_variable( left ) && pl.type.is_variable( right ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_variable( left ) && !pl.type.is_dom_object( left ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", left, atom.indicator ) );
+				} else if( !pl.type.is_variable( right ) && !pl.type.is_dom_object( right ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", right, atom.indicator ) );
+				} else {
+					if( pl.type.is_variable( left ) && right.object.previousElementSibling ) {
+						var elem = new pl.type.DOM( right.object.previousElementSibling );
+						thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [left, elem] ) ), point.substitution, point )] );
+					} else if( !pl.type.is_variable( left ) &&  left.object.nextElementSibling ) {
+						var elem = new pl.type.DOM( left.object.nextElementSibling );
+						thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [right, elem] ) ), point.substitution, point )] );
+					}
+				}
+			},
+			
+			// remove/1
+			"remove/1": function( thread, point, atom ) {
+				var element = atom.args[0];
+				if( pl.type.is_variable( element ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else {
+					if( element.object.parentNode ) {
+						element.object.parentNode.removeChild( element.object );
+						thread.success( point );
+					}
+				}
+			},
+			
+			// insert_after/2
+			"insert_after/2": function( thread, point, atom ) {
+				var element = atom.args[0], reference = atom.args[1];
+				if( pl.type.is_variable( element ) || pl.type.is_variable( reference ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else if( !pl.type.is_dom_object( reference ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", reference, atom.indicator ) );
+				} else {
+					if( reference.object.parentNode ) {
+						reference.object.parentNode.insertBefore(element.object, reference.object.nextSibling);
+						thread.success( point );
+					}
+				}
+			},
+			
+			// insert_before/2
+			"insert_before/2": function( thread, point, atom ) {
+				var element = atom.args[0], reference = atom.args[1];
+				if( pl.type.is_variable( element ) || pl.type.is_variable( reference ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else if( !pl.type.is_dom_object( reference ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", reference, atom.indicator ) );
+				} else {
+					if( reference.object.parentNode ) {
+						reference.object.parentNode.insertBefore(element.object, reference.object);
+						thread.success( point );
+					}
+				}
+			},
+			
+			// prepend_child/2
+			"prepend_child/2": function( thread, point, atom ) {
+				var parent = atom.args[0], child = atom.args[1];
+				if( pl.type.is_variable( parent ) || pl.type.is_variable( child ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( parent ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", parent, atom.indicator ) );
+				} else if( !pl.type.is_dom_object( child ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", child, atom.indicator ) );
+				} else {
+					if( parent.object.firstChild )
+						parent.object.insertBefore( child.object, parent.object.firstChild );
+					else
+						parent.object.appendChild( child.object );
+					thread.success( point );
+				}
+			},
+			
+			// append_child/2
+			"append_child/2": function( thread, point, atom ) {
+				var parent = atom.args[0], child = atom.args[1];
+				if( pl.type.is_variable( parent ) || pl.type.is_variable( child ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( parent ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", parent, atom.indicator ) );
+				} else if( !pl.type.is_dom_object( child ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", child, atom.indicator ) );
+				} else {
+					parent.object.appendChild( child.object );
+					thread.success( point );
+				}
+			},
+			
+			// add_class/2
+			"add_class/2": function( thread, point, atom ) {
+				var element = atom.args[0], name = atom.args[1];
+				if( pl.type.is_variable( element ) || pl.type.is_variable( name ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else if( !pl.type.is_atom( name ) ) {
+					thread.throw_error( pl.error.type( "atom", name, atom.indicator ) );
+				} else {
+					var arr = element.object.className.split(" ");
+					if( arr.indexOf( name.id ) === -1 ) {
+						element.object.className += " " + name.id;
+					}
+					thread.success( point );
+				}
+			},
+			
+			// remove_class/2
+			"remove_class/2": function( thread, point, atom ) {
+				var element = atom.args[0], name = atom.args[1];
+				if( pl.type.is_variable( element ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else if( !pl.type.is_atom( name ) && !pl.type.is_variable( name ) ) {
+					thread.throw_error( pl.error.type( "atom", name, atom.indicator ) );
+				} else {
+					var arr = element.object.className.split(" ");
+					if( pl.type.is_variable( name ) ) {
+						var states = [];
+						for( var i = 0; i < arr.length; i++ ) {
+							states.push( new pl.type.State( point.goal.replace(
+								new pl.type.Term( ",", [
+									new pl.type.Term( "=", [name, new pl.type.Term( arr[i], [] )] ),
+									new pl.type.Term( "remove_class", [element, name] )
+								] )
+							), point.substitution, point ) );
+						}
+						thread.prepend( states );
+					} else {
+						var newclasses = "";
+						for( var i = 0; i < arr.length; i++ )
+							if( arr[i] !== name.id )
+								newclasses += arr[i] + " ";
+						element.object.className = newclasses;
+						thread.success( point );
+					}
+				}
+			},
+			
+			// has_class/2
+			"hasClass/2": function( thread, point, atom ) {
+				var element = atom.args[0], name = atom.args[1];
+				if( pl.type.is_variable( element ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_dom_object( element ) ) {
+					thread.throw_error( pl.error.type( "HTMLObject", element, atom.indicator ) );
+				} else if( !pl.type.is_atom( name ) && !pl.type.is_variable( name ) ) {
+					thread.throw_error( pl.error.type( "atom", name, atom.indicator ) );
+				} else {
+					var arr = element.object.className.split(" ");
+					if( pl.type.is_variable( name ) ) {
+						var states = [];
+						for( var i = 0; i < arr.length; i++ )
+							states.push( new pl.type.State( point.goal.replace( new pl.type.Term( "=", [name, new pl.type.Term( arr[i], [] )] ) ), point.substitution, point ) );
+						thread.prepend( states );
+					} else {
+						if( arr.indexOf( name.id ) !== -1 )
+							thread.success( point );
+					}
+				}
+			}
+			
+		};
+	};
+	
+	var exports = ["document/1", "head/1", "body/1", "show/1", "hide/1", "toggle/1", "create/2", "get_by_id/2", "get_by_tag/2", "get_by_tag/3", "get_by_class/2", "get_by_class/3", "get_by_name/2", "attr/3", "set_attr/3", "get_attr/3", "style/3", "set_style/3", "get_style/3", "html/2", "set_html/2", "get_html/2", "parent_of/2", "insert_after/2", "insert_before/2", "append_child/2", "prepend_child/2", "sibling/2", "remove/1", "add_class/2", "remove_class/2", "has_class/2", "bind/4", "unbind/2", "unbind/3", "event_property/3", "prevent_default/1"];
+	
+	var options = function() {
+		return {
+			meta_predicates: {
+				// bind(+, +, -, 0)
+				"bind/4": new pl.type.Term("bind", [new pl.type.Term("+"), new pl.type.Term("+"), new pl.type.Term("-"), new pl.type.Num(0)])
+			}
+		};
+	};
+	
+	
+	// DOM HTML OBJECTS
+	
+	// Get value of style from Prolog object
+	function styleFromProlog( obj ) {
+		if( obj === undefined || obj === null )
+			return false;
+		else if( pl.type.is_number( obj ) )
+			return obj.value;
+		else if( pl.type.is_term( obj ) && obj.args.length === 0 )
+			return obj.id;
+		else if( pl.type.is_term( obj ) && obj.indicator === "px/1" && pl.type.is_number( obj.args[0] ) )
+			return obj.args[0].value.toString() + "px";
+		else if( pl.type.is_term( obj ) && obj.indicator === "%/1" && pl.type.is_number( obj.args[0] ) )
+			return obj.args[0].value.toString() + "%";
+		else if( pl.type.is_term( obj ) && obj.indicator === "url/1" && pl.type.is_atom( obj.args[0] ) )
+			return "url(\"" + obj.args[0].id + "\")";
+		else if( pl.type.is_term( obj ) && obj.indicator === "rgb/3" && pl.type.is_integer( obj.args[0] ) && pl.type.is_integer( obj.args[1] ) && pl.type.is_integer( obj.args[2] ) )
+			return obj.toString();
+		return false;
+	}
+	
+	// Get value of style to Prolog object
+	function styleToProlog( str ) {
+		if( str === undefined || str === null )
+			return
+		else if( /^-?[0-9]*\.?[0-9]*\s*px\s*$/.test( str ) )
+			return new pl.type.Term( "px", [new pl.type.Num( parseInt( str ) )] );
+		else if( /^-?[0-9]*\.?[0-9]*\s*\%\s*$/.test( str ) )
+			return new pl.type.Term( "%", [new pl.type.Num( parseFloat( str ) )] );
+		else if( /^url\(["'].*["']\)$/.test( str ) )
+			return new pl.type.Term( "url", [new pl.type.Term( str.substring(5, str.length-2) )] );
+		else if( /^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)\s*$/.test( str ) ) {
+			var rgb = str.replace("rgb","").replace("(","").replace(")","").split(",");
+			return new pl.type.Term( "rgb", [new pl.type.Num(parseInt(rgb[0]), false), new pl.type.Num(parseInt(rgb[1]), false), new pl.type.Num(parseInt(rgb[2]), false)] );
+		}
+		return new pl.type.Term( str.toString(), [] );
+	}
+	
+	// Is a DOM object
+	pl.type.is_dom_object = function( obj ) {
+		return obj instanceof pl.type.DOM;
+	};
+
+	// Ordering relation
+	pl.type.order.push( pl.type.DOM );
+
+	// DOM Prolog object
+	pl.type.DOM = function( object ) {
+		this.object = object;
+	}
+
+	// toString
+	pl.type.DOM.prototype.toString = function() {
+		return "<html>(" + (this.object.id !== "" && this.object.id !== undefined ? "#" + this.object.id : this.object.nodeName.toLowerCase().replace("#", "")) + ")";
+	};
+
+	// clone
+	pl.type.DOM.prototype.clone = function() {
+		return new pl.type.DOM( this.object );
+	};
+
+	// equals
+	pl.type.DOM.prototype.equals = function( obj ) {
+		return pl.type.is_dom_object( obj ) && this.object === obj.object;
+	};
+
+	// rename
+	pl.type.DOM.prototype.rename = function( _ ) {
+		return this;
+	};
+
+	// get variables
+	pl.type.DOM.prototype.variables = function() {
+		return [];
+	};
+
+	// apply substitutions
+	pl.type.DOM.prototype.apply = function( _ ) {
+		return this;
+	};
+
+	// unify
+	pl.type.DOM.prototype.unify = function(obj, _) {
+		if(pl.type.is_dom_object(obj) && this.object === obj.object)
+			return new pl.type.Substitution();
+		return null;
+	};
+
+	// interpret
+	pl.type.DOM.prototype.interpret = function( indicator ) {
+		return pl.error.instantiation( indicator );
+	};
+
+	// compare
+	pl.type.DOM.prototype.compare = function( obj ) {
+		if( this.object === obj.object ) {
+			return 0;
+		} else if( this.object < obj.object ) {
+			return -1;
+		} else if( this.object > obj.object ) {
+			return 1;
+		}
+	};
+	
+	// to javascript
+	pl.type.DOM.prototype.toJavaScript = function() {
+		return this.object;
+	};
+	
+	// from javascript
+	pl.fromJavaScript.test.dom = function( obj ) {
+		return obj instanceof HTMLElement;
+	};
+	pl.fromJavaScript.conversion.dom = function( obj ) {
+		return new pl.type.DOM( obj );
+	};
+	
+	// from javascript (collection)
+	pl.fromJavaScript.test.dom_collection = function( obj ) {
+		return obj instanceof HTMLCollection;
+	};
+	pl.fromJavaScript.conversion.dom_collection = function( obj ) {
+		var arr = Array.prototype.slice.call( obj, 0 );
+		return pl.fromJavaScript.apply( arr );
+	};
+
+	// Streamable
+	pl.type.DOM.prototype.stream = function( options, mode ) {
+		if( mode === "write" )
+			if( this.object instanceof HTMLInputElement )
+				this.object.value = "";
+			else
+				this.object.innerHTML = "";
+		return {
+			object: this.object,
+			get: function( length, position ) {
+				var text;
+				if( this.object instanceof HTMLInputElement )
+					text = this.object.value;
+				else
+					text = this.object.innerHTML;
+				if( position >= text.length )
+					return "end_of_stream";
+				return text.substring( position, position+length );
+			},
+			put: function( text, position ) {
+				if( position === "end_of_file" ) {
+					if( this.object instanceof HTMLInputElement )
+						this.object.value += text;
+					else
+						this.object.innerHTML += text;
+					return true;
+				} else if( position === "past_end_of_file" ) {
+					return null;
+				} else {
+					if( this.object instanceof HTMLInputElement )
+						this.object.value = this.object.value.substring(0, position) + text + this.object.value.substring(position+text.length);
+					else
+						this.object.innerHTML = this.object.innerHTML.substring(0, position) + text + this.object.innerHTML.substring(position+text.length);
+					return true;
+				}
+			},
+			get_byte: function( position ) {
+				if( position === "end_of_stream" )
+					return -1;
+				var index = Math.floor(position/2);
+				var text;
+				if( this.object instanceof HTMLInputElement )
+					text = this.object.value.substring( position, position+length );
+				else
+					text = this.object.innerHTML;
+				if( text.length <= index )
+					return -1;
+				var code = pl.utils.codePointAt( text[Math.floor(position/2)], 0 );
+				if( position % 2 === 0 )
+					return code & 0xff;
+				else
+					return code / 256 >>> 0;
+			},
+			put_byte: function( byte, position ) {
+				var text;
+				if( this.object instanceof HTMLInputElement )
+					text = this.object.value;
+				else
+					text = this.object.innerHTML;
+				var index = position === "end_of_stream" ? text.length : Math.floor(position/2);
+				if( text.length < index )
+					return null;
+				var code = text.length === index ? -1 : pl.utils.codePointAt( text[Math.floor(position/2)], 0 );
+				if( position % 2 === 0 ) {
+					code = code / 256 >>> 0;
+					code = ((code & 0xff) << 8) | (byte & 0xff);
+				} else {
+					code = code & 0xff;
+					code = ((byte & 0xff) << 8) | (code & 0xff);
+				}
+				if( text.length === index )
+					text += pl.utils.fromCodePoint( code );
+				else 
+					text = text.substring( 0, index ) + pl.utils.fromCodePoint( code ) + text.substring( index+1 );
+				if( this.object instanceof HTMLInputElement )
+					this.object.value = text;
+				else
+					this.object.innerHTML = text;
+				return true;
+			},
+			flush: function() {
+				return true;
+			},
+			close: function() {
+				return true;
+			}
+		};
+	};
+	
+	
+	
+	// DOM EVENT OBJECTS
+	
+	// Is a DOM Event object
+	pl.type.is_dom_event_object = function( obj ) {
+		return obj instanceof pl.type.DOMEvent;
+	};
+
+	// Ordering relation
+	pl.type.order.push( pl.type.DOMEvent );
+
+	// DOM Event Prolog object
+	pl.type.DOMEvent = function( type, event, epoch ) {
+		this.type = type;
+		this.event = event || null;
+		this.epoch = epoch || (new Date).getTime();
+	}
+
+	// toString
+	pl.type.DOMEvent.prototype.toString = function() {
+		return "<event>(" + this.type.toLowerCase() + ")";
+	};
+
+	// clone
+	pl.type.DOMEvent.prototype.clone = function() {
+		return new pl.type.DOMEvent( this.type, this.event, this.epoch );
+	};
+
+	// equals
+	pl.type.DOMEvent.prototype.equals = function( obj ) {
+		return pl.type.is_dom_event_object( obj ) && this.type === obj.type && this.epoch === obj.epoch;
+	};
+
+	// rename
+	pl.type.DOMEvent.prototype.rename = function( _ ) {
+		return this;
+	};
+
+	// get variables
+	pl.type.DOMEvent.prototype.variables = function() {
+		return [];
+	};
+
+	// apply substitutions
+	pl.type.DOMEvent.prototype.apply = function( _ ) {
+		return this;
+	};
+
+	// unify
+	pl.type.DOMEvent.prototype.unify = function(obj, _) {
+		if(pl.type.is_dom_event_object(obj) && this.type === obj.type && this.epoch === obj.epoch)
+			return new pl.type.Substitution();
+		return null;
+	};
+
+	// interpret
+	pl.type.DOMEvent.prototype.interpret = function( indicator ) {
+		return pl.error.instantiation( indicator );
+	};
+
+	// compare
+	pl.type.DOMEvent.prototype.compare = function( obj ) {
+		if( this.epoch === obj.epoch ) {
+			return 0;
+		} else if( this.epoch < obj.epoch ) {
+			return -1;
+		} else if( this.epoch > obj.epoch ) {
+			return 1;
+		}
+	};
+	
+	// to javascript
+	pl.type.DOMEvent.prototype.toJavaScript = function() {
+		return this.event;
+	};
+	
+	// from javascript
+	pl.fromJavaScript.test.event = function( obj ) {
+		return obj instanceof Event;
+	};
+	pl.fromJavaScript.conversion.event = function( obj ) {
+		return new pl.type.DOMEvent( obj.type, obj );
+	};
+	
+	
+	// EVENT HANDLING
+	var events = (function() {
+
+		var tau_fn_event = {};
+
+
+		var add = function(element, evt, fn) {
+
+			if(element.addEventListener !== undefined) {
+				element.addEventListener(evt, fn);
+				return true;
+			}
+
+			else if(element.attachEvent !== undefined) {
+				element.attachEvent("on" + evt, fn);
+				return true;
+			}
+
+			var prop = element["on" + evt];
+			var fns = [];
+			if(prop) {
+				if(prop.tau_fn_event === tau_fn_event) {
+					if(prop.fns.indexOf(fn) === -1 )
+						prop.fns.push(fn);
+					return true;
+				} else {
+					fns.push(prop);
+				}
+			}
+
+			fns.push(fn);
+			element["on" + evt] = function(e) {
+				for(var i = 0; i < fns.length; i++)
+					fns[i].call(element, e, element);	
+			};
+			element["on" + evt].fns = fns;
+			element["on" + evt].tau_fn_event = tau_fn_event;
+			return true;
+		};
+
+		var remove = function(element, evt, fn) {
+
+			if(element.removeEventListener) {
+				element.removeEventListener(evt, fn);
+				return true;
+			}
+
+			else if(element.detachEvent) {
+				element.detachEvent("on" + evt, fn);
+				return true;
+			}
+
+			else if(element["on" + evt]) {
+				var f = element["on" + evt];
+				if(f === fn)
+					element["on" + evt] = undefined;
+				else if(f.tau_fn_event === tau_fn_event) {
+					for(var i = 0; i < f.fns.length; i++) {
+						if(f.fns[i] === fn) {
+							f.fns.splice(i, 1);
+							break;
+						}
+					}
+					return true;
+				}
+				else
+					return false;
+			}
+
+			return true;
+		};
+
+		return {
+			add: add,
+			remove: remove
+		};
+	})();
+
+	
+
+	if( typeof module !== 'undefined' ) {
+		module.exports = function( p ) {
+			pl = p;
+			new pl.type.Module("dom", predicates(), exports, options());
+		};
+	} else {
+		new pl.type.Module("dom", predicates(), exports, options());
+	}
+	
+
+})( pl );
+var pl;
+(function( pl ) {
+
+	var predicates = function() {
+		
+		return {
+			
+			// global/1
+			"global/1": function( thread, point, atom ) {
+				thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [atom.args[0], pl.fromJavaScript.apply(pl.__env)] ) ), point.substitution, point )] );
+			},
+			
+			// apply/3:
+			"apply/3": [
+				new pl.type.Rule(new pl.type.Term("apply", [new pl.type.Var("X"),new pl.type.Var("Y"),new pl.type.Var("Z")]), new pl.type.Term(",", [new pl.type.Term("global", [new pl.type.Var("G")]),new pl.type.Term("apply", [new pl.type.Var("G"),new pl.type.Var("X"),new pl.type.Var("Y"),new pl.type.Var("Z")])]))
+			],
+			
+			// apply/4
+			"apply/4": function( thread, point, atom ) {
+				var context = atom.args[0], name = atom.args[1], args = atom.args[2], result = atom.args[3];
+				if( pl.type.is_variable( context ) || pl.type.is_variable( name ) || pl.type.is_variable( args ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_atom( name ) && (!pl.type.is_js_object( name ) || typeof name.value !== "function") ) {
+					thread.throw_error( pl.error.type( "atom_or_JSValueFUNCTION", name, atom.indicator ) );
+				} else if( !pl.type.is_list( args ) ) {
+					thread.throw_error( pl.error.type( "list", args, atom.indicator ) );
+				}
+				var ctx = context.toJavaScript();
+				var fn = pl.type.is_atom( name ) ? ctx[name.id] : name.toJavaScript();
+				if( typeof fn === "function" ) {
+					var pointer = args;
+					var pltojs;
+					var arr = [];
+					while( pointer.indicator === "./2" ) {
+						pltojs = pointer.args[0].toJavaScript();
+						if( pltojs === undefined ) {
+							thread.throw_error( pl.error.domain( "javascript_object", pointer.args[0], atom.indicator ) );
+							return undefined;
+						}
+						arr.push( pltojs );
+						pointer = pointer.args[1];
+					}
+					if( pl.type.is_variable( pointer ) ) {
+						thread.throw_error( pl.error.instantiation( atom.indicator ) );
+						return;
+					} else if( pointer.indicator !== "[]/0" ) {
+						thread.throw_error( pl.error.type( "list", args, atom.indicator ) );
+						return
+					}
+					var value;
+					try {
+						value = fn.apply( ctx, arr );
+					} catch( e ) {
+						thread.throw_error( pl.error.javascript( e.toString(), atom.indicator ) );
+						return;
+					}
+					value = pl.fromJavaScript.apply( value );
+					thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [value, result] ) ), point.substitution, point )] );
+				}
+			},
+
+			// prop/2 (deprecated)
+			"prop/2": [
+				new pl.type.Rule(new pl.type.Term("prop", [new pl.type.Var("X"),new pl.type.Var("Y")]), new pl.type.Term("get_prop", [new pl.type.Var("X"),new pl.type.Var("Y")]))
+			],
+
+			// prop/3 (deprecated)
+			"prop/3": [
+				new pl.type.Rule(new pl.type.Term("prop", [new pl.type.Var("X"),new pl.type.Var("Y"),new pl.type.Var("Z")]), new pl.type.Term("get_prop", [new pl.type.Var("X"),new pl.type.Var("Y"),new pl.type.Var("Z")]))
+			],
+			
+			// get_prop/2
+			"get_prop/2": [
+				new pl.type.Rule(new pl.type.Term("get_prop", [new pl.type.Var("X"),new pl.type.Var("Y")]), new pl.type.Term(",", [new pl.type.Term("global", [new pl.type.Var("G")]),new pl.type.Term("get_prop", [new pl.type.Var("G"),new pl.type.Var("X"),new pl.type.Var("Y")])]))
+			],
+			
+			// get_prop/3
+			"get_prop/3": function( thread, point, atom ) {
+				var context = atom.args[0], name = atom.args[1], result = atom.args[2];
+				if( pl.type.is_variable( context ) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_variable( name ) && !pl.type.is_atom( name ) ) {
+					thread.throw_error( pl.error.type( "atom", name, atom.indicator ) );
+				} else {
+					if( pl.type.is_atom( name ) ) {
+						var fn = context.toJavaScript()[name.id];
+						if( fn !== undefined ) {
+							fn = pl.fromJavaScript.apply( fn );
+							thread.prepend( [new pl.type.State( point.goal.replace( new pl.type.Term( "=", [fn, result] ) ), point.substitution, point )] );
+						}
+					} else {
+						var fn = context.toJavaScript();
+						var states = [];
+						for( var x in fn ) {
+							if( fn.hasOwnProperty( x ) ) {
+								var fn_ = pl.fromJavaScript.apply( fn[x] );
+								states.push( new pl.type.State( point.goal.replace( new pl.type.Term( ",", [
+									new pl.type.Term( "=", [fn_, result] ),
+									new pl.type.Term( "=", [new pl.type.Term(x, []), name] )
+								]) ), point.substitution, point ) );
+							}
+						}
+						thread.prepend( states );
+					}
+				}
+			},
+
+			// set_prop/2:
+			"set_prop/2": [
+				new pl.type.Rule(new pl.type.Term("set_prop", [new pl.type.Var("X"),new pl.type.Var("Y")]), new pl.type.Term(",", [new pl.type.Term("global", [new pl.type.Var("G")]),new pl.type.Term("set_prop", [new pl.type.Var("G"),new pl.type.Var("X"),new pl.type.Var("Y")])]))
+			],
+
+			// set_prop/3
+			"set_prop/3": function(thread, point, atom) {
+				var context = atom.args[0], key = atom.args[1], value = atom.args[2];
+				if(pl.type.is_variable(context) || pl.type.is_variable(key)) {
+					thread.throw_error(pl.error.instantiation(atom.indicator));
+				} else if(!pl.type.is_atom(key)) {
+					thread.throw_error(pl.error.type("atom", key, atom.indicator));
+				} else {
+					var obj = context.toJavaScript();
+					if(obj !== undefined) {
+						obj[key.id] = value.toJavaScript();
+						thread.success(point);
+					}
+				}
+			},
+
+			// new/3
+			"new/3": function(thread, point, atom) {
+				var obj = atom.args[0], args = atom.args[1], instance = atom.args[2];
+				if(pl.type.is_variable(obj) || pl.type.is_variable(args)) {
+					thread.throw_error(pl.error.instantiation(atom.indicator));
+				} else if(!pl.type.is_js_object(obj)) {
+					thread.throw_error(pl.error.type("JsValueOBJECT", args, atom.indicator));
+				} else if(!pl.type.is_list(args)) {
+					thread.throw_error(pl.error.type("list", args, atom.indicator));
+				} else {
+					var arr_args = [];
+					var pointer = args;
+					while(pl.type.is_term(pointer) && pointer.indicator === "./2") {
+						arr_args.push(pointer.args[0].toJavaScript());
+						pointer = pointer.args[1];
+					}
+					if(!pl.type.is_term(pointer) || pointer.indicator !== "[]/0") {
+						thread.throw_error(pl.error.type("list", args, atom.indicator));
+						return;
+					}
+					try {
+						var result = pl.fromJavaScript.apply(
+							new (Function.prototype.bind.apply(obj.value, [null].concat(arr_args)))
+						);
+						thread.prepend([
+							new pl.type.State(
+								point.goal.replace(new pl.type.Term("=", [instance, result])),
+								point.substitution,
+								point
+							)
+						]);
+					} catch(error) {
+						thread.throw_error(pl.error.javascript(error.toString(), atom.indicator));
+					}
+				}
+			},
+
+			// json_prolog/2
+			"json_prolog/2": function( thread, point, atom ) {
+				var json = atom.args[0], prolog = atom.args[1];
+				if( pl.type.is_variable(json) && pl.type.is_variable(prolog) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_variable(json) && (!pl.type.is_js_object(json) || typeof(json.value) !== "object")) {
+					thread.throw_error( pl.error.type( "JsValueOBJECT", json, atom.indicator ) );
+				} else if( !pl.type.is_variable(prolog) && !pl.type.is_list(prolog) ) {
+					thread.throw_error( pl.error.type( "list", prolog, atom.indicator ) );
+				} else {
+					if(pl.type.is_variable(prolog)) {
+						var list = pl.fromJavaScript.apply(json.value, true);
+						thread.prepend([new pl.type.State(
+							point.goal.replace(new pl.type.Term("=", [prolog, list])),
+							point.substitution,
+							point
+						)]);
+					} else {
+						var obj = new pl.type.JSValue(prolog.toJavaScript());
+						thread.prepend([new pl.type.State(
+							point.goal.replace(new pl.type.Term("=", [json, obj])),
+							point.substitution,
+							point
+						)]);
+					}
+				}
+			},
+
+			// json_atom/2
+			"json_atom/2": function( thread, point, atom ) {
+				var json = atom.args[0], prolog = atom.args[1];
+				if( pl.type.is_variable(json) && pl.type.is_variable(prolog) ) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if( !pl.type.is_variable(json) && (!pl.type.is_js_object(json) || typeof(json.value) !== "object")) {
+					thread.throw_error( pl.error.type( "JsValueOBJECT", json, atom.indicator ) );
+				} else if( !pl.type.is_variable(prolog) && !pl.type.is_atom(prolog) ) {
+					thread.throw_error( pl.error.type( "atom", prolog, atom.indicator ) );
+				} else {
+					if(pl.type.is_variable(prolog)) {
+						try {
+							var jatom = new pl.type.Term(JSON.stringify(json.value), []);
+							thread.prepend([new pl.type.State(
+								point.goal.replace(new pl.type.Term("=", [prolog, jatom])),
+								point.substitution,
+								point
+							)]);
+						} catch(ex) {}
+					} else {
+						try {
+							var obj = pl.fromJavaScript.apply(JSON.parse(prolog.id));
+							thread.prepend([new pl.type.State(
+								point.goal.replace(new pl.type.Term("=", [json, obj])),
+								point.substitution,
+								point
+							)]);
+						} catch(ex) {}
+					}
+				}
+			},
+
+			// ajax/3
+			"ajax/3": [
+				new pl.type.Rule(new pl.type.Term("ajax", [new pl.type.Var("Method"),new pl.type.Var("URL"),new pl.type.Var("Response")]), new pl.type.Term("ajax", [new pl.type.Var("Method"),new pl.type.Var("URL"),new pl.type.Var("Response"),new pl.type.Term("[]", [])]))
+			],
+
+			// ajax/4
+			"ajax/4": function( thread, point, atom ) {
+				var method = atom.args[0], url = atom.args[1], value = atom.args[2], options = atom.args[3];
+				if(pl.type.is_variable(url) || pl.type.is_variable(method) || pl.type.is_variable(options)) {
+					thread.throw_error( pl.error.instantiation( atom.indicator ) );
+				} else if(!pl.type.is_atom(url)) {
+					thread.throw_error( pl.error.type( "atom", url, atom.indicator ) );
+				} else if(!pl.type.is_atom(method)) {
+					thread.throw_error( pl.error.type( "atom", method, atom.indicator ) );
+				} else if(!pl.type.is_list(options)) {
+					thread.throw_error( pl.error.type( "list", options, atom.indicator ) );
+				} else if(["connect", "delete", "get", "head", "options", "patch", "post", "put", "trace"].indexOf(method.id) === -1) {
+					thread.throw_error( pl.error.domain( "http_method", method, atom.indicator ) );
+				} else {
+					var pointer = options;
+					var opt_type = null;
+					var opt_timeout = 0;
+					var opt_credentials = "false";
+					var opt_async = "true";
+					var opt_mime = null;
+					var opt_headers = [];
+					var opt_body = new FormData();
+					var opt_user = null;
+					var opt_password = null;
+					// Options
+					while(pl.type.is_term(pointer) && pointer.indicator === "./2") {
+						var option = pointer.args[0];
+						if(!pl.type.is_term(option) || option.args.length !== 1) {
+							thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+							return;
+						}
+						var prop = option.args[0];
+						// type/1
+						if(option.indicator === "type/1") {
+							if(!pl.type.is_atom(prop) || prop.id !== "text" && prop.id !== "json" && prop.id !== "document") {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							opt_type = prop.id;
+						// user/1
+						} else if(option.indicator === "user/1") {
+							if(!pl.type.is_atom(prop)) {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							opt_user = prop.id;
+						// password/1
+						} else if(option.indicator === "password/1") {
+							if(!pl.type.is_atom(prop)) {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							opt_password = prop.id;
+						// timeout/1
+						} else if(option.indicator === "timeout/1") {
+							if(!pl.type.is_integer(prop) || prop.value < 0) {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							opt_timeout = prop.value;
+						// async/1
+						} else if(option.indicator === "async/1") {
+							if(!pl.type.is_atom(prop) || prop.id !== "true" && prop.id !== "false") {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							opt_async = prop.id;
+						// credentials/1
+						} else if(option.indicator === "credentials/1") {
+							if(!pl.type.is_atom(prop) || prop.id !== "true" && prop.id !== "false") {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							opt_credentials = prop.id;
+						// mime/1
+						} else if(option.indicator === "mime/1") {
+							if(!pl.type.is_atom(prop)) {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							opt_mime = prop.id;
+						// headers/1
+						} else if(option.indicator === "headers/1") {
+							if(!pl.type.is_list(prop)) {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							var hpointer = prop;
+							while(pl.type.is_term(hpointer) && hpointer.indicator === "./2") {
+								var header = hpointer.args[0];
+								if(!pl.type.is_term(header) || header.indicator !== "-/2" || !pl.type.is_atom(header.args[0]) || !pl.type.is_atom(header.args[1])) {
+									thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+									return;
+								}
+								opt_headers.push({header: header.args[0].id, value: header.args[1].id});
+								hpointer = hpointer.args[1];
+							}
+							if(pl.type.is_variable(hpointer)) {
+								thread.throw_error( pl.error.instantiation( atom.indicator ) );
+								return;
+							} else if(!pl.type.is_term(hpointer) || hpointer.indicator !== "[]/0") {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+						// body/1
+						} else if(option.indicator === "body/1") {
+							if(!pl.type.is_list(prop) && (pl.type.is_dom_object === undefined || !pl.type.is_dom_object(prop)) && !pl.type.is_atom(prop)) {
+								thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+								return;
+							}
+							if(pl.type.is_list(prop)) {
+								var hpointer = prop;
+								while(pl.type.is_term(hpointer) && hpointer.indicator === "./2") {
+									var body = hpointer.args[0];
+									if(!pl.type.is_term(body) || body.indicator !== "-/2" || !pl.type.is_atom(body.args[0]) || !pl.type.is_atom(body.args[1])) {
+										thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+										return;
+									}
+									opt_body.append(body.args[0].id, body.args[1].id);
+									hpointer = hpointer.args[1];
+								}
+								if(pl.type.is_variable(hpointer)) {
+									thread.throw_error( pl.error.instantiation( atom.indicator ) );
+									return;
+								} else if(!pl.type.is_term(hpointer) || hpointer.indicator !== "[]/0") {
+									thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+									return;
+								}
+							} else if(pl.type.is_atom(prop)) {
+								opt_body = prop.id;
+							} else {
+								opt_body = prop.value;
+							}
+						// otherwise
+						} else {
+							thread.throw_error( pl.error.domain( "ajax_option", option, atom.indicator ) );
+							return;
+						}
+						pointer = pointer.args[1];
+					}
+					if(pl.type.is_variable(pointer)) {
+						thread.throw_error( pl.error.instantiation( atom.indicator ) );
+						return;
+					} else if(!pl.type.is_term(pointer) || pointer.indicator !== "[]/0") {
+						thread.throw_error( pl.error.type( "list", options, atom.indicator ) );
+						return;
+					}
+					// Request
+					var xhttp = new XMLHttpRequest();
+					if(opt_mime !== null)
+						xhttp.overrideMimeType(opt_mime);
+					var fn = function() {
+						if(this.readyState == 4) {
+							if(this.status == 200) {
+								// Get response
+								var data = null;
+								var content_type = this.getResponseHeader("Content-Type");
+								if(this.responseType === "json" && this.response) {
+									data = pl.fromJavaScript.apply(this.response);
+								} else if(this.responseType === "" && content_type.indexOf("application/json") !== -1) {
+									try {
+										data = pl.fromJavaScript.apply(JSON.parse(this.responseText));
+									} catch(e) {}
+								}
+								if(data === null) {
+									if((this.responseType === "document" || this.responseType === "" && content_type.indexOf("text/html") !== -1 || this.responseType === "" && content_type.indexOf("application/xml") !== -1) && this.responseXML !== null && pl.type.DOM !== undefined) {
+										data = new pl.type.DOM( this.responseXML );
+									} else if(this.responseType === "" || this.responseType === "text") {
+										data = new pl.type.Term(this.responseText, []);
+									}
+								}
+								// Add answer
+								if(data !== null)
+									thread.prepend( [
+										new pl.type.State(
+											point.goal.replace(new pl.type.Term("=", [value, data])),
+											point.substitution,
+											point
+										)
+									] );
+							}
+							if(opt_async === "true")
+								thread.again();
+						}
+					};
+					xhttp.onreadystatechange = fn;
+					xhttp.open(method.id.toUpperCase(), url.id, opt_async === "true", opt_user, opt_password);
+					if(opt_type !== null && opt_async === "true")
+						xhttp.responseType = opt_type;
+					xhttp.withCredentials = opt_credentials === "true";
+					if(opt_async === "true")
+						xhttp.timeout = opt_timeout;
+					for(var i = 0; i < opt_headers.length; i++)
+						xhttp.setRequestHeader(opt_headers[i].header, opt_headers[i].value);
+					xhttp.send(opt_body);
+					if(opt_async === "true")
+						return true;
+					else
+						fn.apply(xhttp);
+				}
+			}
+
+		};
+	};
+	
+	var exports = ["global/1", "apply/3", "apply/4", "prop/2", "prop/3", "get_prop/2", "get_prop/3", "set_prop/2", "set_prop/3", "new/3", "json_prolog/2", "json_atom/2", "ajax/3", "ajax/4"];	
+
+	// JS OBJECTS
+	function define_properties() {
+
+		// Is a JS object
+		pl.type.is_js_object = function( obj ) {
+			return obj instanceof pl.type.JSValue;
+		};
+
+		// Ordering relation
+		pl.type.order.push( pl.type.JSValue );
+
+		// JSValue Prolog object
+		pl.type.JSValue = function( value ) {
+			this.value = value;
+		}
+
+		// toString
+		pl.type.JSValue.prototype.toString = function() {
+			return "<javascript>(" + (typeof this.value).toLowerCase() + ")";
+		};
+
+		// clone
+		pl.type.JSValue.prototype.clone = function() {
+			return new pl.type.JSValue( this.value );
+		};
+
+		// equals
+		pl.type.JSValue.prototype.equals = function( obj ) {
+			return pl.type.is_js_object( obj ) && this.value === obj.value;
+		};
+
+		// rename
+		pl.type.JSValue.prototype.rename = function( _ ) {
+			return this;
+		};
+
+		// get variables
+		pl.type.JSValue.prototype.variables = function() {
+			return [];
+		};
+
+		// apply substitutions
+		pl.type.JSValue.prototype.apply = function( _ ) {
+			return this;
+		};
+
+		// unify
+		pl.type.JSValue.prototype.unify = function(obj, occurs_check) {
+			if(pl.type.is_js_object(obj) && this.value === obj.value)
+				return new pl.type.Substitution();
+			if(pl.type.is_term(obj) && obj.indicator === "{}/1") {
+				var left = [], right = [];
+				var pointer = obj.args[0];
+				var props = [];
+				while(pl.type.is_term(pointer) && pointer.indicator === ",/2") {
+					props.push(pointer.args[0]);
+					pointer = pointer.args[1];
+				}
+				props.push(pointer);
+				for(var i = 0; i < props.length; i++) {
+					var bind = props[i];
+					if(!pl.type.is_term(bind) || bind.indicator !== ":/2")
+						return null;
+					var name = bind.args[0];
+					if(!pl.type.is_atom(name) || !this.value.hasOwnProperty(name.id))
+						return null;
+					var value = pl.fromJavaScript.apply(this.value[name.id]);
+					right.push(bind.args[1]);
+					left.push(value);
+				}
+				return pl.unify(left, right, occurs_check);
+			}
+			return null;
+		};
+
+		// interpret
+		pl.type.JSValue.prototype.interpret = function( indicator ) {
+			return pl.error.instantiation( indicator );
+		};
+
+		// compare
+		pl.type.JSValue.prototype.compare = function( obj ) {
+			if( this.value === obj.value ) {
+				return 0;
+			} else if( this.value < obj.value ) {
+				return -1;
+			} else if( this.value > obj.value ) {
+				return 1;
+			}
+		};
+
+		// to javascript
+		pl.type.JSValue.prototype.toJavaScript = function() {
+			return this.value;
+		};
+
+		// from javascript
+		pl.fromJavaScript.conversion.any = function( obj ) {
+			return new pl.type.JSValue( obj );
+		};
+
+		// JavaScript error
+		pl.error.javascript = function( error, indicator ) {
+			return new pl.type.Term( "error", [new pl.type.Term( "javascript_error", [new pl.type.Term( error )] ), pl.utils.str_indicator( indicator )] );
+		};
+	}
+	
+
+
+	if( typeof module !== 'undefined' ) {
+		module.exports = function( p ) {
+			pl = p;
+			define_properties();
+			new pl.type.Module( "js", predicates(), exports );
+		};
+	} else {
+		define_properties();
+		new pl.type.Module( "js", predicates(), exports );
+	}
+
+})( pl );
+var pl;
+(function(pl) {
+	var name = "charsio";
+	var predicates = function() {
+		return {
+
+            // write_term_to_chars/3
+            "write_term_to_chars/3": function(thread, point, atom) {
+                var term = atom.args[0], options = atom.args[1], chars = atom.args[2];
+                if(!pl.type.is_variable(chars) && !pl.type.is_list(chars)) {
+                    thread.throw_error(pl.error.type("list", chars, atom.indicator));
+                } else if(pl.type.is_variable(options)) {
+                    thread.throw_error(pl.error.instantiation(atom.indicator));
+                } else {
+                    // check chars
+                    if(!pl.type.is_variable(chars)) {
+                        var pointer = chars;
+                        while(pl.type.is_term(pointer) && pointer.indicator === "./2") {
+                            var char = pointer.args[0];
+                            if(!pl.type.is_character(char)) {
+                                thread.throw_error(pl.error.type("character", char, atom.indicator));
+                                return;
+                            }
+                            pointer = pointer.args[1];
+                        }
+                        if(!pl.type.is_variable(pointer) && !pl.type.is_empty_list(pointer)) {
+                            thread.throw_error(pl.error.type("list", chars, atom.indicator));
+                            return;
+                        }
+                    }
+                    // get options
+                    var obj_options = {};
+                    var pointer = options;
+                    var property;
+                    while(pl.type.is_term(pointer) && pointer.indicator === "./2") {
+                        property = pointer.args[0];
+                        if(pl.type.is_variable(property)) {
+                            thread.throw_error( pl.error.instantiation( atom.indicator ) );
+                            return;
+                        } else if(!pl.type.is_write_option(property)) {
+                            thread.throw_error( pl.error.domain("write_option", property, atom.indicator));
+                            return;
+                        }
+                        obj_options[property.id] = property.args[0].id === "true";
+                        pointer = pointer.args[1];
+                    }
+                    if(pointer.indicator !== "[]/0") {
+                        if(pl.type.is_variable(pointer))
+                            thread.throw_error(pl.error.instantiation(atom.indicator));
+                        else
+                            thread.throw_error(pl.error.type("list", options, atom.indicator));
+                        return;
+                    } else {
+                        obj_options.session = thread.session;
+                        var text = term.toString( obj_options );
+                        var list = new pl.type.Term("[]", []);
+                        for(var i = pl.utils.stringLength(text)-1; i >= 0; i--)
+                            list = new pl.type.Term(".", [new pl.type.Term(pl.utils.fromCodePoint(pl.utils.codePointAt(text, i)), []), list]);
+                        thread.prepend([new pl.type.State(
+                            point.goal.replace(new pl.type.Term("=", [chars, list])),
+                            point.substitution,
+                            point
+                        )]);
+                    }
+                }
+            },
+
+            // fabricate_var_name/3
+            "fabricate_var_name/3": [
+                new pl.type.Rule(new pl.type.Term("fabricate_var_name", [new pl.type.Var("VarType"),new pl.type.Var("VarName"),new pl.type.Var("N")]), new pl.type.Term(",", [new pl.type.Term("char_code", [new pl.type.Term("A", []),new pl.type.Var("AC")]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("LN"),new pl.type.Term("+", [new pl.type.Term("mod", [new pl.type.Var("N"),new pl.type.Num(26, false)]),new pl.type.Var("AC")])]),new pl.type.Term(",", [new pl.type.Term("char_code", [new pl.type.Var("LC"),new pl.type.Var("LN")]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("NN"),new pl.type.Term("//", [new pl.type.Var("N"),new pl.type.Num(26, false)])]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=:=", [new pl.type.Var("NN"),new pl.type.Num(0, false)]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("==", [new pl.type.Var("VarType"),new pl.type.Term("fabricated", [])]),new pl.type.Term("atom_chars", [new pl.type.Var("VarName"),new pl.type.Term(".", [new pl.type.Term("_", []),new pl.type.Term(".", [new pl.type.Var("LC"),new pl.type.Term("[]", [])])])])]),new pl.type.Term("->", [new pl.type.Term("==", [new pl.type.Var("VarType"),new pl.type.Term("numbervars", [])]),new pl.type.Term("atom_chars", [new pl.type.Var("VarName"),new pl.type.Term(".", [new pl.type.Var("LC"),new pl.type.Term("[]", [])])])])])]),new pl.type.Term(",", [new pl.type.Term("number_chars", [new pl.type.Var("NN"),new pl.type.Var("NNChars")]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("==", [new pl.type.Var("VarType"),new pl.type.Term("fabricated", [])]),new pl.type.Term("atom_chars", [new pl.type.Var("VarName"),new pl.type.Term(".", [new pl.type.Term("_", []),new pl.type.Term(".", [new pl.type.Var("LC"),new pl.type.Var("NNChars")])])])]),new pl.type.Term("->", [new pl.type.Term("==", [new pl.type.Var("VarType"),new pl.type.Term("numbervars", [])]),new pl.type.Term("atom_chars", [new pl.type.Var("VarName"),new pl.type.Term(".", [new pl.type.Var("LC"),new pl.type.Var("NNChars")])])])])])])])])])]))
+            ]
+
+        };
+    };
+	var exports = ["write_term_to_chars/3"];
+	if(typeof module !== 'undefined') {
+		module.exports = function(p) {
+			pl = p;
+			new pl.type.Module(name, predicates(), exports);
+		};
+	} else {
+		new pl.type.Module(name, predicates(), exports);
+	}
+})(pl);var pl;
+(function(pl) {
+	var name = "format";
+	var predicates = function() {
+		return {
+			"format_/4": [
+				new pl.type.Rule(new pl.type.Term("format_", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32320"),new pl.type.Var("_32322")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("is_list", [new pl.type.Var("_32316")]),new pl.type.Term("true", [])]),new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("type_error", [new pl.type.Term("list", []),new pl.type.Var("_32316")]),new pl.type.Term("//", [new pl.type.Term("format_", []),new pl.type.Num(2, false)])])])]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("is_list", [new pl.type.Var("_32317")]),new pl.type.Term("true", [])]),new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("type_error", [new pl.type.Term("list", []),new pl.type.Var("_32317")]),new pl.type.Term("//", [new pl.type.Term("format_", []),new pl.type.Num(2, false)])])])]),new pl.type.Term(",", [new pl.type.Term("unique_variable_names", [new pl.type.Var("_32317"),new pl.type.Var("_32318")]),new pl.type.Term("phrase", [new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Num(0, false),new pl.type.Term("[]", []),new pl.type.Var("_32318")]),new pl.type.Var("_32319")])])])]),new pl.type.Term("=", [new pl.type.Var("_32320"),new pl.type.Var("_32321")])]),new pl.type.Term("format_cells", [new pl.type.Var("_32319"),new pl.type.Var("_32321"),new pl.type.Var("_32322")])]))
+			],
+			"format_cells/3": [
+				new pl.type.Rule(new pl.type.Term("format_cells", [new pl.type.Term("[]", []),new pl.type.Var("_32323"),new pl.type.Var("_32323")]), new pl.type.Term("true", [])),
+				new pl.type.Rule(new pl.type.Term("format_cells", [new pl.type.Term(".", [new pl.type.Var("_32324"),new pl.type.Var("_32319")]),new pl.type.Var("_32325"),new pl.type.Var("_32327")]), new pl.type.Term(",", [new pl.type.Term("format_cell", [new pl.type.Var("_32324"),new pl.type.Var("_32325"),new pl.type.Var("_32326")]),new pl.type.Term("format_cells", [new pl.type.Var("_32319"),new pl.type.Var("_32326"),new pl.type.Var("_32327")])]))
+			],
+			"format_cell/3": [
+				new pl.type.Rule(new pl.type.Term("format_cell", [new pl.type.Term("newline", []),new pl.type.Term(".", [new pl.type.Term("\n", []),new pl.type.Var("_32329")]),new pl.type.Var("_32329")]), null),
+				new pl.type.Rule(new pl.type.Term("format_cell", [new pl.type.Term("cell", [new pl.type.Var("_32330"),new pl.type.Var("_32331"),new pl.type.Var("_32332")]),new pl.type.Var("_32341"),new pl.type.Var("_32343")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("elements_gluevars", [new pl.type.Var("_32332"),new pl.type.Num(0, false),new pl.type.Var("_32333")]),new pl.type.Var("_32334")]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=", [new pl.type.Var("_32334"),new pl.type.Term("[]", [])]),new pl.type.Term("true", [])]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32335"),new pl.type.Term("-", [new pl.type.Term("-", [new pl.type.Var("_32331"),new pl.type.Var("_32330")]),new pl.type.Var("_32333")])]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=<", [new pl.type.Var("_32335"),new pl.type.Num(0, false)]),new pl.type.Term("maplist", [new pl.type.Term("=", [new pl.type.Num(0, false)]),new pl.type.Var("_32334")])]),new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32334"),new pl.type.Var("_32336")]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32337"),new pl.type.Term("//", [new pl.type.Var("_32335"),new pl.type.Var("_32336")])]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32338"),new pl.type.Term("-", [new pl.type.Var("_32335"),new pl.type.Term("*", [new pl.type.Var("_32337"),new pl.type.Var("_32336")])])]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=:=", [new pl.type.Var("_32338"),new pl.type.Num(0, false)]),new pl.type.Term("maplist", [new pl.type.Term("=", [new pl.type.Var("_32337")]),new pl.type.Var("_32334")])]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32339"),new pl.type.Term("+", [new pl.type.Var("_32337"),new pl.type.Var("_32338")])]),new pl.type.Term(",", [new pl.type.Term("reverse", [new pl.type.Var("_32334"),new pl.type.Term(".", [new pl.type.Var("_32339"),new pl.type.Var("_32340")])]),new pl.type.Term("maplist", [new pl.type.Term("=", [new pl.type.Var("_32337")]),new pl.type.Var("_32340")])])])])])])])])])])]),new pl.type.Term("=", [new pl.type.Var("_32341"),new pl.type.Var("_32342")])]),new pl.type.Term("format_elements", [new pl.type.Var("_32332"),new pl.type.Var("_32342"),new pl.type.Var("_32343")])]))
+			],
+			"format_elements/3": [
+				new pl.type.Rule(new pl.type.Term("format_elements", [new pl.type.Term("[]", []),new pl.type.Var("_32344"),new pl.type.Var("_32344")]), new pl.type.Term("true", [])),
+				new pl.type.Rule(new pl.type.Term("format_elements", [new pl.type.Term(".", [new pl.type.Var("_32345"),new pl.type.Var("_32332")]),new pl.type.Var("_32346"),new pl.type.Var("_32348")]), new pl.type.Term(",", [new pl.type.Term("format_element", [new pl.type.Var("_32345"),new pl.type.Var("_32346"),new pl.type.Var("_32347")]),new pl.type.Term("format_elements", [new pl.type.Var("_32332"),new pl.type.Var("_32347"),new pl.type.Var("_32348")])]))
+			],
+			"format_element/3": [
+				new pl.type.Rule(new pl.type.Term("format_element", [new pl.type.Term("chars", [new pl.type.Var("_32349")]),new pl.type.Var("_32350"),new pl.type.Var("_32351")]), new pl.type.Term("seq", [new pl.type.Var("_32349"),new pl.type.Var("_32350"),new pl.type.Var("_32351")])),
+				new pl.type.Rule(new pl.type.Term("format_element", [new pl.type.Term("glue", [new pl.type.Var("_32352"),new pl.type.Var("_32353")]),new pl.type.Var("_32355"),new pl.type.Var("_32357")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32354"),new pl.type.Var("_32353")]),new pl.type.Term("maplist", [new pl.type.Term("=", [new pl.type.Var("_32352")]),new pl.type.Var("_32354")])]),new pl.type.Term("=", [new pl.type.Var("_32355"),new pl.type.Var("_32356")])]),new pl.type.Term("seq", [new pl.type.Var("_32354"),new pl.type.Var("_32356"),new pl.type.Var("_32357")])]))
+			],
+			"elements_gluevars/5": [
+				new pl.type.Rule(new pl.type.Term("elements_gluevars", [new pl.type.Term("[]", []),new pl.type.Var("_32358"),new pl.type.Var("_32358"),new pl.type.Var("_32359"),new pl.type.Var("_32359")]), new pl.type.Term("true", [])),
+				new pl.type.Rule(new pl.type.Term("elements_gluevars", [new pl.type.Term(".", [new pl.type.Var("_32345"),new pl.type.Var("_32332")]),new pl.type.Var("_32360"),new pl.type.Var("_32358"),new pl.type.Var("_32362"),new pl.type.Var("_32364")]), new pl.type.Term(",", [new pl.type.Term("element_gluevar", [new pl.type.Var("_32345"),new pl.type.Var("_32360"),new pl.type.Var("_32361"),new pl.type.Var("_32362"),new pl.type.Var("_32363")]),new pl.type.Term("elements_gluevars", [new pl.type.Var("_32332"),new pl.type.Var("_32361"),new pl.type.Var("_32358"),new pl.type.Var("_32363"),new pl.type.Var("_32364")])]))
+			],
+			"element_gluevar/5": [
+				new pl.type.Rule(new pl.type.Term("element_gluevar", [new pl.type.Term("chars", [new pl.type.Var("_32349")]),new pl.type.Var("_32360"),new pl.type.Var("_32358"),new pl.type.Var("_32366"),new pl.type.Var("_32367")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32349"),new pl.type.Var("_32365")]),new pl.type.Term("is", [new pl.type.Var("_32358"),new pl.type.Term("+", [new pl.type.Var("_32360"),new pl.type.Var("_32365")])])]),new pl.type.Term("=", [new pl.type.Var("_32366"),new pl.type.Var("_32367")])])),
+				new pl.type.Rule(new pl.type.Term("element_gluevar", [new pl.type.Term("glue", [new pl.type.Var("__32368"),new pl.type.Var("_32369")]),new pl.type.Var("_32358"),new pl.type.Var("_32358"),new pl.type.Term(".", [new pl.type.Var("_32369"),new pl.type.Var("_32371")]),new pl.type.Var("_32371")]), null)
+			],
+			"cells/7": [
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term("[]", []),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("__32373"),new pl.type.Var("_32374"),new pl.type.Var("_32378")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32374"),new pl.type.Var("_32375")])]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term(",", [new pl.type.Term("==", [new pl.type.Var("_32317"),new pl.type.Term("[]", [])]),new pl.type.Term("=", [new pl.type.Var("_32375"),new pl.type.Var("_32376")])]),new pl.type.Term("cell", [new pl.type.Var("_32372"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32376"),new pl.type.Var("_32377")])]),new pl.type.Term(",", [new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("domain_error", [new pl.type.Term("empty_list", []),new pl.type.Var("_32317")]),new pl.type.Term("//", [new pl.type.Term("cells", []),new pl.type.Num(5, false)])])]),new pl.type.Term("=", [new pl.type.Var("_32375"),new pl.type.Var("_32378")])])]),new pl.type.Term("=", [new pl.type.Var("_32377"),new pl.type.Var("_32378")])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32316")])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32379"),new pl.type.Var("_32381")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32379"),new pl.type.Var("_32380")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term("[]", [])])]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32380"),new pl.type.Var("_32381")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("w", []),new pl.type.Var("_32316")])]),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")]),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32384"),new pl.type.Var("_32387")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32384"),new pl.type.Var("_32385")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("write_term_to_chars", [new pl.type.Var("_32382"),new pl.type.Term(".", [new pl.type.Term("numbervars", [new pl.type.Term("true", [])]),new pl.type.Term(".", [new pl.type.Term("variable_names", [new pl.type.Var("_32318")]),new pl.type.Term("[]", [])])]),new pl.type.Var("_32383")]),new pl.type.Term("=", [new pl.type.Var("_32385"),new pl.type.Var("_32386")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32383")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32386"),new pl.type.Var("_32387")])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("q", []),new pl.type.Var("_32316")])]),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")]),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32388"),new pl.type.Var("_32391")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32388"),new pl.type.Var("_32389")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("write_term_to_chars", [new pl.type.Var("_32382"),new pl.type.Term(".", [new pl.type.Term("quoted", [new pl.type.Term("true", [])]),new pl.type.Term(".", [new pl.type.Term("numbervars", [new pl.type.Term("true", [])]),new pl.type.Term(".", [new pl.type.Term("variable_names", [new pl.type.Var("_32318")]),new pl.type.Term("[]", [])])])]),new pl.type.Var("_32383")]),new pl.type.Term("=", [new pl.type.Var("_32389"),new pl.type.Var("_32390")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32383")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32390"),new pl.type.Var("_32391")])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("a", []),new pl.type.Var("_32316")])]),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")]),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32392"),new pl.type.Var("_32395")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32392"),new pl.type.Var("_32393")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("atom_chars", [new pl.type.Var("_32382"),new pl.type.Var("_32383")]),new pl.type.Term("=", [new pl.type.Var("_32393"),new pl.type.Var("_32394")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32383")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32394"),new pl.type.Var("_32395")])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32404"),new pl.type.Var("_32411")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("d", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Term(".", [new pl.type.Var("_32398"),new pl.type.Var("_32317")])]),new pl.type.Term("=", [new pl.type.Var("_32404"),new pl.type.Var("_32405")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32405"),new pl.type.Var("_32406")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32382"),new pl.type.Var("_32398")]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("integer", [new pl.type.Var("_32382")]),new pl.type.Term("true", [])]),new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("type_error", [new pl.type.Term("integer", []),new pl.type.Var("_32382")]),new pl.type.Term("//", [new pl.type.Term("cells", []),new pl.type.Num(5, false)])])])]),new pl.type.Term("number_chars", [new pl.type.Var("_32382"),new pl.type.Var("_32399")])])]),new pl.type.Term("=", [new pl.type.Var("_32406"),new pl.type.Var("_32407")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term(",", [new pl.type.Term("=:=", [new pl.type.Var("_32353"),new pl.type.Num(0, false)]),new pl.type.Term("=", [new pl.type.Var("_32407"),new pl.type.Var("_32408")])]),new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32349"),new pl.type.Var("_32399")]),new pl.type.Term("=", [new pl.type.Var("_32408"),new pl.type.Var("_32409")])])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32399"),new pl.type.Var("_32365")]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=<", [new pl.type.Var("_32365"),new pl.type.Var("_32353")]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32338"),new pl.type.Term("-", [new pl.type.Var("_32353"),new pl.type.Var("_32365")])]),new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32400"),new pl.type.Var("_32338")]),new pl.type.Term(",", [new pl.type.Term("maplist", [new pl.type.Term("=", [new pl.type.Term("0", [])]),new pl.type.Var("_32400")]),new pl.type.Term("phrase", [new pl.type.Term(",", [new pl.type.Term(".", [new pl.type.Term("0", []),new pl.type.Term(".", [new pl.type.Term(".", []),new pl.type.Term("[]", [])])]),new pl.type.Term(",", [new pl.type.Term("seq", [new pl.type.Var("_32400")]),new pl.type.Term("seq", [new pl.type.Var("_32399")])])]),new pl.type.Var("_32349")])])])])]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32401"),new pl.type.Term("-", [new pl.type.Var("_32365"),new pl.type.Var("_32353")])]),new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32402"),new pl.type.Var("_32401")]),new pl.type.Term(",", [new pl.type.Term("append", [new pl.type.Var("_32402"),new pl.type.Var("_32403"),new pl.type.Var("_32399")]),new pl.type.Term("phrase", [new pl.type.Term(",", [new pl.type.Term("seq", [new pl.type.Var("_32402")]),new pl.type.Term(",", [new pl.type.Term(".", [new pl.type.Term(".", []),new pl.type.Term("[]", [])]),new pl.type.Term("seq", [new pl.type.Var("_32403")])])]),new pl.type.Var("_32349")])])])])])]),new pl.type.Term("=", [new pl.type.Var("_32407"),new pl.type.Var("_32410")])])]),new pl.type.Term("=", [new pl.type.Var("_32409"),new pl.type.Var("_32410")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32349")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32410"),new pl.type.Var("_32411")])])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32417"),new pl.type.Var("_32421")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("D", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")])]),new pl.type.Term("=", [new pl.type.Var("_32417"),new pl.type.Var("_32418")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32418"),new pl.type.Var("_32419")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("number_chars", [new pl.type.Var("_32353"),new pl.type.Var("_32412")]),new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term(",", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term("[]", [])]),new pl.type.Term(",", [new pl.type.Term("seq", [new pl.type.Var("_32412")]),new pl.type.Term(".", [new pl.type.Term("d", []),new pl.type.Term("[]", [])])])]),new pl.type.Var("_32413")]),new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("format_", [new pl.type.Var("_32413"),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Term("[]", [])])]),new pl.type.Var("_32399")]),new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("upto_what", [new pl.type.Var("_32414"),new pl.type.Term(".", [])]),new pl.type.Var("_32399"),new pl.type.Var("_32403")]),new pl.type.Term(",", [new pl.type.Term("reverse", [new pl.type.Var("_32414"),new pl.type.Var("_32415")]),new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("groups_of_three", [new pl.type.Var("_32415")]),new pl.type.Var("_32416")]),new pl.type.Term(",", [new pl.type.Term("reverse", [new pl.type.Var("_32416"),new pl.type.Var("_32402")]),new pl.type.Term("append", [new pl.type.Var("_32402"),new pl.type.Var("_32403"),new pl.type.Var("_32349")])])])])])])])]),new pl.type.Term("=", [new pl.type.Var("_32419"),new pl.type.Var("_32420")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32349")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32420"),new pl.type.Var("_32421")])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("i", []),new pl.type.Var("_32316")])]),new pl.type.Term(".", [new pl.type.Var("__32422"),new pl.type.Var("_32317")]),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32423"),new pl.type.Var("_32425")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32423"),new pl.type.Var("_32424")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32424"),new pl.type.Var("_32425")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("n", []),new pl.type.Var("_32316")])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32426"),new pl.type.Var("_32430")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32426"),new pl.type.Var("_32427")])]),new pl.type.Term(",", [new pl.type.Term("cell", [new pl.type.Var("_32372"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32427"),new pl.type.Var("_32428")]),new pl.type.Term(",", [new pl.type.Term("n_newlines", [new pl.type.Num(1, false),new pl.type.Var("_32428"),new pl.type.Var("_32429")]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Num(0, false),new pl.type.Term("[]", []),new pl.type.Var("_32318"),new pl.type.Var("_32429"),new pl.type.Var("_32430")])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32431"),new pl.type.Var("_32436")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("n", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Var("_32317")]),new pl.type.Term("=", [new pl.type.Var("_32431"),new pl.type.Var("_32432")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32432"),new pl.type.Var("_32433")])]),new pl.type.Term(",", [new pl.type.Term("cell", [new pl.type.Var("_32372"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32433"),new pl.type.Var("_32434")]),new pl.type.Term(",", [new pl.type.Term("n_newlines", [new pl.type.Var("_32353"),new pl.type.Var("_32434"),new pl.type.Var("_32435")]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Num(0, false),new pl.type.Term("[]", []),new pl.type.Var("_32318"),new pl.type.Var("_32435"),new pl.type.Var("_32436")])])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("s", []),new pl.type.Var("_32316")])]),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")]),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32437"),new pl.type.Var("_32439")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32437"),new pl.type.Var("_32438")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32382")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32438"),new pl.type.Var("_32439")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("f", []),new pl.type.Var("_32316")])]),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")]),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32440"),new pl.type.Var("_32443")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32440"),new pl.type.Var("_32441")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("format_number_chars", [new pl.type.Var("_32382"),new pl.type.Var("_32383")]),new pl.type.Term("=", [new pl.type.Var("_32441"),new pl.type.Var("_32442")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32383")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32442"),new pl.type.Var("_32443")])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32445"),new pl.type.Var("_32449")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("f", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")])]),new pl.type.Term("=", [new pl.type.Var("_32445"),new pl.type.Var("_32446")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32446"),new pl.type.Var("_32447")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("format_number_chars", [new pl.type.Var("_32382"),new pl.type.Var("_32399")]),new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("upto_what", [new pl.type.Var("_32402"),new pl.type.Term(".", [])]),new pl.type.Var("_32399"),new pl.type.Var("_32349")]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=:=", [new pl.type.Var("_32353"),new pl.type.Num(0, false)]),new pl.type.Term("=", [new pl.type.Var("_32383"),new pl.type.Var("_32402")])]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=", [new pl.type.Var("_32349"),new pl.type.Term(".", [new pl.type.Term(".", []),new pl.type.Var("_32340")])]),new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32340"),new pl.type.Var("_32365")]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("<", [new pl.type.Var("_32353"),new pl.type.Var("_32365")]),new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32403"),new pl.type.Var("_32353")]),new pl.type.Term("append", [new pl.type.Var("_32403"),new pl.type.Var("__32444"),new pl.type.Var("_32340")])])]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=:=", [new pl.type.Var("_32353"),new pl.type.Var("_32365")]),new pl.type.Term("=", [new pl.type.Var("_32403"),new pl.type.Var("_32340")])]),new pl.type.Term(",", [new pl.type.Term(">", [new pl.type.Var("_32353"),new pl.type.Var("_32365")]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32338"),new pl.type.Term("-", [new pl.type.Var("_32353"),new pl.type.Var("_32365")])]),new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32400"),new pl.type.Var("_32338")]),new pl.type.Term(",", [new pl.type.Term("maplist", [new pl.type.Term("=", [new pl.type.Term("0", [])]),new pl.type.Var("_32400")]),new pl.type.Term("append", [new pl.type.Var("_32340"),new pl.type.Var("_32400"),new pl.type.Var("_32403")])])])])])])])])]),new pl.type.Term(",", [new pl.type.Term("length", [new pl.type.Var("_32403"),new pl.type.Var("_32353")]),new pl.type.Term("maplist", [new pl.type.Term("=", [new pl.type.Term("0", [])]),new pl.type.Var("_32403")])])]),new pl.type.Term("append", [new pl.type.Var("_32402"),new pl.type.Term(".", [new pl.type.Term(".", []),new pl.type.Var("_32403")]),new pl.type.Var("_32383")])])])])]),new pl.type.Term("=", [new pl.type.Var("_32447"),new pl.type.Var("_32448")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32383")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32448"),new pl.type.Var("_32449")])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("r", []),new pl.type.Var("_32316")])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32450"),new pl.type.Var("_32452")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32450"),new pl.type.Var("_32451")])]),new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("8", []),new pl.type.Term(".", [new pl.type.Term("r", []),new pl.type.Var("_32316")])])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32451"),new pl.type.Var("_32452")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32453"),new pl.type.Var("_32457")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("r", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")])]),new pl.type.Term("=", [new pl.type.Var("_32453"),new pl.type.Var("_32454")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32454"),new pl.type.Var("_32455")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("integer_to_radix", [new pl.type.Var("_32382"),new pl.type.Var("_32353"),new pl.type.Term("lowercase", []),new pl.type.Var("_32349")]),new pl.type.Term("=", [new pl.type.Var("_32455"),new pl.type.Var("_32456")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32349")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32456"),new pl.type.Var("_32457")])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("R", []),new pl.type.Var("_32316")])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32458"),new pl.type.Var("_32460")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32458"),new pl.type.Var("_32459")])]),new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("8", []),new pl.type.Term(".", [new pl.type.Term("R", []),new pl.type.Var("_32316")])])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32459"),new pl.type.Var("_32460")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32461"),new pl.type.Var("_32465")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("R", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Term(".", [new pl.type.Var("_32382"),new pl.type.Var("_32317")])]),new pl.type.Term("=", [new pl.type.Var("_32461"),new pl.type.Var("_32462")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32462"),new pl.type.Var("_32463")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("integer_to_radix", [new pl.type.Var("_32382"),new pl.type.Var("_32353"),new pl.type.Term("uppercase", []),new pl.type.Var("_32349")]),new pl.type.Term("=", [new pl.type.Var("_32463"),new pl.type.Var("_32464")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32349")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32464"),new pl.type.Var("_32465")])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("`", []),new pl.type.Term(".", [new pl.type.Var("_32466"),new pl.type.Term(".", [new pl.type.Term("t", []),new pl.type.Var("_32316")])])])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32468"),new pl.type.Var("_32470")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32468"),new pl.type.Var("_32469")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("glue", [new pl.type.Var("_32466"),new pl.type.Var("__32467")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32469"),new pl.type.Var("_32470")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("t", []),new pl.type.Var("_32316")])]),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32472"),new pl.type.Var("_32474")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32472"),new pl.type.Var("_32473")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("glue", [new pl.type.Term(" ", []),new pl.type.Var("__32471")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32473"),new pl.type.Var("_32474")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("|", []),new pl.type.Var("_32316")])]),new pl.type.Var("_32317"),new pl.type.Var("_32475"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32478"),new pl.type.Var("_32482")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32478"),new pl.type.Var("_32479")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("elements_gluevars", [new pl.type.Var("_32332"),new pl.type.Num(0, false),new pl.type.Var("_32476")]),new pl.type.Var("__32477")]),new pl.type.Term("is", [new pl.type.Var("_32372"),new pl.type.Term("+", [new pl.type.Var("_32475"),new pl.type.Var("_32476")])])]),new pl.type.Term("=", [new pl.type.Var("_32479"),new pl.type.Var("_32480")])]),new pl.type.Term(",", [new pl.type.Term("cell", [new pl.type.Var("_32475"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32480"),new pl.type.Var("_32481")]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term("[]", []),new pl.type.Var("_32318"),new pl.type.Var("_32481"),new pl.type.Var("_32482")])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32483"),new pl.type.Var("_32487")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("|", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Var("_32317")]),new pl.type.Term("=", [new pl.type.Var("_32483"),new pl.type.Var("_32484")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32484"),new pl.type.Var("_32485")])]),new pl.type.Term(",", [new pl.type.Term("cell", [new pl.type.Var("_32372"),new pl.type.Var("_32353"),new pl.type.Var("_32332"),new pl.type.Var("_32485"),new pl.type.Var("_32486")]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32353"),new pl.type.Term("[]", []),new pl.type.Var("_32318"),new pl.type.Var("_32486"),new pl.type.Var("_32487")])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32396")]),new pl.type.Var("_32397"),new pl.type.Var("_32475"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32488"),new pl.type.Var("_32493")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("numeric_argument", [new pl.type.Var("_32396"),new pl.type.Var("_32353"),new pl.type.Term(".", [new pl.type.Term("+", []),new pl.type.Var("_32316")]),new pl.type.Var("_32397"),new pl.type.Var("_32317")]),new pl.type.Term("=", [new pl.type.Var("_32488"),new pl.type.Var("_32489")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32489"),new pl.type.Var("_32490")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32372"),new pl.type.Term("+", [new pl.type.Var("_32475"),new pl.type.Var("_32353")])]),new pl.type.Term("=", [new pl.type.Var("_32490"),new pl.type.Var("_32491")])]),new pl.type.Term(",", [new pl.type.Term("cell", [new pl.type.Var("_32475"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32491"),new pl.type.Var("_32492")]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term("[]", []),new pl.type.Var("_32318"),new pl.type.Var("_32492"),new pl.type.Var("_32493")])])])])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32349")]),new pl.type.Var("_32317"),new pl.type.Var("__32494"),new pl.type.Var("__32495"),new pl.type.Var("__32496"),new pl.type.Var("_32497"),new pl.type.Var("_32500")]), new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term(",", [new pl.type.Term("==", [new pl.type.Var("_32317"),new pl.type.Term("[]", [])]),new pl.type.Term("=", [new pl.type.Var("_32497"),new pl.type.Var("_32498")])]),new pl.type.Term(",", [new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("domain_error", [new pl.type.Term("non_empty_list", []),new pl.type.Term("[]", [])]),new pl.type.Term("//", [new pl.type.Term("cells", []),new pl.type.Num(5, false)])])]),new pl.type.Term("=", [new pl.type.Var("_32498"),new pl.type.Var("_32499")])])]),new pl.type.Term(",", [new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("domain_error", [new pl.type.Term("format_string", []),new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Var("_32349")])]),new pl.type.Term("//", [new pl.type.Term("cells", []),new pl.type.Num(5, false)])])]),new pl.type.Term("=", [new pl.type.Var("_32497"),new pl.type.Var("_32500")])])]),new pl.type.Term("=", [new pl.type.Var("_32499"),new pl.type.Var("_32500")])])),
+				new pl.type.Rule(new pl.type.Term("cells", [new pl.type.Var("_32396"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Var("_32332"),new pl.type.Var("_32318"),new pl.type.Var("_32504"),new pl.type.Var("_32506")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("upto_what", [new pl.type.Var("_32501"),new pl.type.Term("~", [])]),new pl.type.Var("_32396"),new pl.type.Var("_32316")]),new pl.type.Term("=", [new pl.type.Var("_32501"),new pl.type.Term(".", [new pl.type.Var("__32502"),new pl.type.Var("__32503")])])]),new pl.type.Term("=", [new pl.type.Var("_32504"),new pl.type.Var("_32505")])]),new pl.type.Term("cells", [new pl.type.Var("_32316"),new pl.type.Var("_32317"),new pl.type.Var("_32372"),new pl.type.Term(".", [new pl.type.Term("chars", [new pl.type.Var("_32501")]),new pl.type.Var("_32332")]),new pl.type.Var("_32318"),new pl.type.Var("_32505"),new pl.type.Var("_32506")])]))
+			],
+			"format_number_chars/2": [
+				new pl.type.Rule(new pl.type.Term("format_number_chars", [new pl.type.Var("N0"),new pl.type.Var("Chars")]), new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("N"),new pl.type.Var("N0")]),new pl.type.Term("number_chars", [new pl.type.Var("N"),new pl.type.Var("Chars")])]))
+			],
+			"n_newlines/3": [
+				new pl.type.Rule(new pl.type.Term("n_newlines", [new pl.type.Num(0, false),new pl.type.Var("_32507"),new pl.type.Var("_32508")]), new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32507"),new pl.type.Var("_32508")])])),
+				new pl.type.Rule(new pl.type.Term("n_newlines", [new pl.type.Var("_32360"),new pl.type.Var("_32509"),new pl.type.Var("_32512")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(">", [new pl.type.Var("_32360"),new pl.type.Num(0, false)]),new pl.type.Term("is", [new pl.type.Var("_32358"),new pl.type.Term("-", [new pl.type.Var("_32360"),new pl.type.Num(1, false)])])]),new pl.type.Term("=", [new pl.type.Var("_32509"),new pl.type.Var("_32510")])]),new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32510"),new pl.type.Term(".", [new pl.type.Term("newline", []),new pl.type.Var("_32511")])]),new pl.type.Term("n_newlines", [new pl.type.Var("_32358"),new pl.type.Var("_32511"),new pl.type.Var("_32512")])])]))
+			],
+			"upto_what/4": [
+				new pl.type.Rule(new pl.type.Term("upto_what", [new pl.type.Term("[]", []),new pl.type.Var("_32513"),new pl.type.Var("_32514"),new pl.type.Var("_32517")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32514"),new pl.type.Term(".", [new pl.type.Var("_32513"),new pl.type.Var("_32515")])]),new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32515"),new pl.type.Var("_32516")])])]),new pl.type.Term("=", [new pl.type.Var("_32517"),new pl.type.Term(".", [new pl.type.Var("_32513"),new pl.type.Var("_32516")])])])),
+				new pl.type.Rule(new pl.type.Term("upto_what", [new pl.type.Term(".", [new pl.type.Var("_32518"),new pl.type.Var("_32349")]),new pl.type.Var("_32513"),new pl.type.Term(".", [new pl.type.Var("_32518"),new pl.type.Var("_32520")]),new pl.type.Var("_32522")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32520"),new pl.type.Var("_32521")])]),new pl.type.Term("upto_what", [new pl.type.Var("_32349"),new pl.type.Var("_32513"),new pl.type.Var("_32521"),new pl.type.Var("_32522")])])),
+				new pl.type.Rule(new pl.type.Term("upto_what", [new pl.type.Term("[]", []),new pl.type.Var("__32523"),new pl.type.Var("_32524"),new pl.type.Var("_32524")]), new pl.type.Term("true", []))
+			],
+			"groups_of_three/3": [
+				new pl.type.Rule(new pl.type.Term("groups_of_three", [new pl.type.Term(".", [new pl.type.Var("_32525"),new pl.type.Term(".", [new pl.type.Var("_32526"),new pl.type.Term(".", [new pl.type.Var("_32518"),new pl.type.Term(".", [new pl.type.Var("_32527"),new pl.type.Var("_32528")])])])]),new pl.type.Var("_32529"),new pl.type.Var("_32533")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32529"),new pl.type.Var("_32530")])]),new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32530"),new pl.type.Term(".", [new pl.type.Var("_32525"),new pl.type.Term(".", [new pl.type.Var("_32526"),new pl.type.Term(".", [new pl.type.Var("_32518"),new pl.type.Var("_32531")])])])]),new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32531"),new pl.type.Term(".", [new pl.type.Term(",", []),new pl.type.Var("_32532")])]),new pl.type.Term("groups_of_three", [new pl.type.Term(".", [new pl.type.Var("_32527"),new pl.type.Var("_32528")]),new pl.type.Var("_32532"),new pl.type.Var("_32533")])])])])),
+				new pl.type.Rule(new pl.type.Term("groups_of_three", [new pl.type.Var("_32354"),new pl.type.Var("_32534"),new pl.type.Var("_32535")]), new pl.type.Term("seq", [new pl.type.Var("_32354"),new pl.type.Var("_32534"),new pl.type.Var("_32535")]))
+			],
+			"cell/5": [
+				new pl.type.Rule(new pl.type.Term("cell", [new pl.type.Var("_32330"),new pl.type.Var("_32331"),new pl.type.Var("_32536"),new pl.type.Var("_32537"),new pl.type.Var("_32540")]), new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term(",", [new pl.type.Term("==", [new pl.type.Var("_32536"),new pl.type.Term("[]", [])]),new pl.type.Term("=", [new pl.type.Var("_32537"),new pl.type.Var("_32538")])]),new pl.type.Term("true", [])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("reverse", [new pl.type.Var("_32536"),new pl.type.Var("_32332")]),new pl.type.Term("=", [new pl.type.Var("_32537"),new pl.type.Var("_32539")])]),new pl.type.Term("=", [new pl.type.Var("_32539"),new pl.type.Term(".", [new pl.type.Term("cell", [new pl.type.Var("_32330"),new pl.type.Var("_32331"),new pl.type.Var("_32332")]),new pl.type.Var("_32540")])])])]),new pl.type.Term("=", [new pl.type.Var("_32538"),new pl.type.Var("_32540")])]))
+			],
+			"numeric_argument/5": [
+				new pl.type.Rule(new pl.type.Term("numeric_argument", [new pl.type.Var("Ds"),new pl.type.Var("Num"),new pl.type.Var("Rest"),new pl.type.Var("Args0"),new pl.type.Var("Args")]), new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=", [new pl.type.Var("Ds"),new pl.type.Term(".", [new pl.type.Term("*", []),new pl.type.Var("Rest")])]),new pl.type.Term("=", [new pl.type.Var("Args0"),new pl.type.Term(".", [new pl.type.Var("Num"),new pl.type.Var("Args")])])]),new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("numeric_argument_", [new pl.type.Var("Ds"),new pl.type.Var("Rest")]),new pl.type.Var("Ns")]),new pl.type.Term(",", [new pl.type.Term("foldl", [new pl.type.Term("plus_times10", []),new pl.type.Var("Ns"),new pl.type.Num(0, false),new pl.type.Var("Num")]),new pl.type.Term("=", [new pl.type.Var("Args0"),new pl.type.Var("Args")])])])]))
+			],
+			"numeric_argument_/4": [
+				new pl.type.Rule(new pl.type.Term("numeric_argument_", [new pl.type.Term(".", [new pl.type.Var("_32527"),new pl.type.Var("_32403")]),new pl.type.Var("_32340"),new pl.type.Var("_32541"),new pl.type.Var("_32546")]), new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term(",", [new pl.type.Term("member", [new pl.type.Var("_32527"),new pl.type.Term(".", [new pl.type.Term("0", []),new pl.type.Term(".", [new pl.type.Term("1", []),new pl.type.Term(".", [new pl.type.Term("2", []),new pl.type.Term(".", [new pl.type.Term("3", []),new pl.type.Term(".", [new pl.type.Term("4", []),new pl.type.Term(".", [new pl.type.Term("5", []),new pl.type.Term(".", [new pl.type.Term("6", []),new pl.type.Term(".", [new pl.type.Term("7", []),new pl.type.Term(".", [new pl.type.Term("8", []),new pl.type.Term(".", [new pl.type.Term("9", []),new pl.type.Term("[]", [])])])])])])])])])])])]),new pl.type.Term("=", [new pl.type.Var("_32541"),new pl.type.Var("_32542")])]),new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("number_chars", [new pl.type.Var("_32358"),new pl.type.Term(".", [new pl.type.Var("_32527"),new pl.type.Term("[]", [])])]),new pl.type.Term("=", [new pl.type.Var("_32542"),new pl.type.Var("_32543")])]),new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32543"),new pl.type.Term(".", [new pl.type.Var("_32358"),new pl.type.Var("_32544")])]),new pl.type.Term("numeric_argument_", [new pl.type.Var("_32403"),new pl.type.Var("_32340"),new pl.type.Var("_32544"),new pl.type.Var("_32545")])])])]),new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32340"),new pl.type.Term(".", [new pl.type.Var("_32527"),new pl.type.Var("_32403")])]),new pl.type.Term("=", [new pl.type.Var("_32541"),new pl.type.Var("_32546")])])]),new pl.type.Term("=", [new pl.type.Var("_32545"),new pl.type.Var("_32546")])]))
+			],
+			"plus_times10/3": [
+				new pl.type.Rule(new pl.type.Term("plus_times10", [new pl.type.Var("D"),new pl.type.Var("N0"),new pl.type.Var("N")]), new pl.type.Term("is", [new pl.type.Var("N"),new pl.type.Term("+", [new pl.type.Var("D"),new pl.type.Term("*", [new pl.type.Var("N0"),new pl.type.Num(10, false)])])]))
+			],
+			"radix_error/4": [
+				new pl.type.Rule(new pl.type.Term("radix_error", [new pl.type.Term("lowercase", []),new pl.type.Var("_32547"),new pl.type.Var("_32548"),new pl.type.Var("_32549")]), new pl.type.Term("format_", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("d", []),new pl.type.Term(".", [new pl.type.Term("r", []),new pl.type.Term("[]", [])])])])])]),new pl.type.Term(".", [new pl.type.Var("_32547"),new pl.type.Term("[]", [])]),new pl.type.Var("_32548"),new pl.type.Var("_32549")])),
+				new pl.type.Rule(new pl.type.Term("radix_error", [new pl.type.Term("uppercase", []),new pl.type.Var("_32547"),new pl.type.Var("_32550"),new pl.type.Var("_32551")]), new pl.type.Term("format_", [new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("~", []),new pl.type.Term(".", [new pl.type.Term("d", []),new pl.type.Term(".", [new pl.type.Term("R", []),new pl.type.Term("[]", [])])])])])]),new pl.type.Term(".", [new pl.type.Var("_32547"),new pl.type.Term("[]", [])]),new pl.type.Var("_32550"),new pl.type.Var("_32551")]))
+			],
+			"integer_to_radix/4": [
+				new pl.type.Rule(new pl.type.Term("integer_to_radix", [new pl.type.Var("I0"),new pl.type.Var("R"),new pl.type.Var("Which"),new pl.type.Var("Cs")]), new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("I"),new pl.type.Var("I0")]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("integer", [new pl.type.Var("I")]),new pl.type.Term("true", [])]),new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("type_error", [new pl.type.Term("integer", []),new pl.type.Var("I")]),new pl.type.Term("/", [new pl.type.Term("integer_to_radix", []),new pl.type.Num(4, false)])])])]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("integer", [new pl.type.Var("R")]),new pl.type.Term("true", [])]),new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("type_error", [new pl.type.Term("integer", []),new pl.type.Var("R")]),new pl.type.Term("/", [new pl.type.Term("integer_to_radix", []),new pl.type.Num(4, false)])])])]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("\\+", [new pl.type.Term("between", [new pl.type.Num(2, false),new pl.type.Num(36, false),new pl.type.Var("R")])]),new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("radix_error", [new pl.type.Var("Which"),new pl.type.Var("R")]),new pl.type.Var("Es")]),new pl.type.Term("throw", [new pl.type.Term("error", [new pl.type.Term("domain_error", [new pl.type.Term("format_string", []),new pl.type.Var("Es")]),new pl.type.Term("/", [new pl.type.Term("integer_to_radix", []),new pl.type.Num(4, false)])])])])]),new pl.type.Term("true", [])]),new pl.type.Term(",", [new pl.type.Term("digits", [new pl.type.Var("Which"),new pl.type.Var("Ds")]),new pl.type.Term(",", [new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("<", [new pl.type.Var("I"),new pl.type.Num(0, false)]),new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("Pos"),new pl.type.Term("abs", [new pl.type.Var("I")])]),new pl.type.Term("phrase", [new pl.type.Term("integer_to_radix_", [new pl.type.Var("Pos"),new pl.type.Var("R"),new pl.type.Var("Ds")]),new pl.type.Var("Cs0"),new pl.type.Term(".", [new pl.type.Term("-", []),new pl.type.Term("[]", [])])])])]),new pl.type.Term(";", [new pl.type.Term("->", [new pl.type.Term("=:=", [new pl.type.Var("I"),new pl.type.Num(0, false)]),new pl.type.Term("=", [new pl.type.Var("Cs0"),new pl.type.Term(".", [new pl.type.Term("0", []),new pl.type.Term("[]", [])])])]),new pl.type.Term("phrase", [new pl.type.Term("integer_to_radix_", [new pl.type.Var("I"),new pl.type.Var("R"),new pl.type.Var("Ds")]),new pl.type.Var("Cs0")])])]),new pl.type.Term("reverse", [new pl.type.Var("Cs0"),new pl.type.Var("Cs")])])])])])])]))
+			],
+			"integer_to_radix_/5": [
+				new pl.type.Rule(new pl.type.Term("integer_to_radix_", [new pl.type.Num(0, false),new pl.type.Var("__32552"),new pl.type.Var("__32553"),new pl.type.Var("_32554"),new pl.type.Var("_32555")]), new pl.type.Term(",", [new pl.type.Term("!", []),new pl.type.Term("=", [new pl.type.Var("_32554"),new pl.type.Var("_32555")])])),
+				new pl.type.Rule(new pl.type.Term("integer_to_radix_", [new pl.type.Var("_32556"),new pl.type.Var("_32547"),new pl.type.Var("_32403"),new pl.type.Var("_32559"),new pl.type.Var("_32562")]), new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term(",", [new pl.type.Term("is", [new pl.type.Var("_32557"),new pl.type.Term("mod", [new pl.type.Var("_32556"),new pl.type.Var("_32547")])]),new pl.type.Term(",", [new pl.type.Term("nth0", [new pl.type.Var("_32557"),new pl.type.Var("_32403"),new pl.type.Var("_32527")]),new pl.type.Term("is", [new pl.type.Var("_32558"),new pl.type.Term("//", [new pl.type.Var("_32556"),new pl.type.Var("_32547")])])])]),new pl.type.Term("=", [new pl.type.Var("_32559"),new pl.type.Var("_32560")])]),new pl.type.Term(",", [new pl.type.Term("=", [new pl.type.Var("_32560"),new pl.type.Term(".", [new pl.type.Var("_32527"),new pl.type.Var("_32561")])]),new pl.type.Term("integer_to_radix_", [new pl.type.Var("_32558"),new pl.type.Var("_32547"),new pl.type.Var("_32403"),new pl.type.Var("_32561"),new pl.type.Var("_32562")])])]))
+			],
+			"digits/2": [
+				new pl.type.Rule(new pl.type.Term("digits", [new pl.type.Term("lowercase", []),new pl.type.Term(".", [new pl.type.Term("0", []),new pl.type.Term(".", [new pl.type.Term("1", []),new pl.type.Term(".", [new pl.type.Term("2", []),new pl.type.Term(".", [new pl.type.Term("3", []),new pl.type.Term(".", [new pl.type.Term("4", []),new pl.type.Term(".", [new pl.type.Term("5", []),new pl.type.Term(".", [new pl.type.Term("6", []),new pl.type.Term(".", [new pl.type.Term("7", []),new pl.type.Term(".", [new pl.type.Term("8", []),new pl.type.Term(".", [new pl.type.Term("9", []),new pl.type.Term(".", [new pl.type.Term("a", []),new pl.type.Term(".", [new pl.type.Term("b", []),new pl.type.Term(".", [new pl.type.Term("c", []),new pl.type.Term(".", [new pl.type.Term("d", []),new pl.type.Term(".", [new pl.type.Term("e", []),new pl.type.Term(".", [new pl.type.Term("f", []),new pl.type.Term(".", [new pl.type.Term("g", []),new pl.type.Term(".", [new pl.type.Term("h", []),new pl.type.Term(".", [new pl.type.Term("i", []),new pl.type.Term(".", [new pl.type.Term("j", []),new pl.type.Term(".", [new pl.type.Term("k", []),new pl.type.Term(".", [new pl.type.Term("l", []),new pl.type.Term(".", [new pl.type.Term("m", []),new pl.type.Term(".", [new pl.type.Term("n", []),new pl.type.Term(".", [new pl.type.Term("o", []),new pl.type.Term(".", [new pl.type.Term("p", []),new pl.type.Term(".", [new pl.type.Term("q", []),new pl.type.Term(".", [new pl.type.Term("r", []),new pl.type.Term(".", [new pl.type.Term("s", []),new pl.type.Term(".", [new pl.type.Term("t", []),new pl.type.Term(".", [new pl.type.Term("u", []),new pl.type.Term(".", [new pl.type.Term("v", []),new pl.type.Term(".", [new pl.type.Term("w", []),new pl.type.Term(".", [new pl.type.Term("x", []),new pl.type.Term(".", [new pl.type.Term("y", []),new pl.type.Term(".", [new pl.type.Term("z", []),new pl.type.Term("[]", [])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])]), null),
+				new pl.type.Rule(new pl.type.Term("digits", [new pl.type.Term("uppercase", []),new pl.type.Term(".", [new pl.type.Term("0", []),new pl.type.Term(".", [new pl.type.Term("1", []),new pl.type.Term(".", [new pl.type.Term("2", []),new pl.type.Term(".", [new pl.type.Term("3", []),new pl.type.Term(".", [new pl.type.Term("4", []),new pl.type.Term(".", [new pl.type.Term("5", []),new pl.type.Term(".", [new pl.type.Term("6", []),new pl.type.Term(".", [new pl.type.Term("7", []),new pl.type.Term(".", [new pl.type.Term("8", []),new pl.type.Term(".", [new pl.type.Term("9", []),new pl.type.Term(".", [new pl.type.Term("A", []),new pl.type.Term(".", [new pl.type.Term("B", []),new pl.type.Term(".", [new pl.type.Term("C", []),new pl.type.Term(".", [new pl.type.Term("D", []),new pl.type.Term(".", [new pl.type.Term("E", []),new pl.type.Term(".", [new pl.type.Term("F", []),new pl.type.Term(".", [new pl.type.Term("G", []),new pl.type.Term(".", [new pl.type.Term("H", []),new pl.type.Term(".", [new pl.type.Term("I", []),new pl.type.Term(".", [new pl.type.Term("J", []),new pl.type.Term(".", [new pl.type.Term("K", []),new pl.type.Term(".", [new pl.type.Term("L", []),new pl.type.Term(".", [new pl.type.Term("M", []),new pl.type.Term(".", [new pl.type.Term("N", []),new pl.type.Term(".", [new pl.type.Term("O", []),new pl.type.Term(".", [new pl.type.Term("P", []),new pl.type.Term(".", [new pl.type.Term("Q", []),new pl.type.Term(".", [new pl.type.Term("R", []),new pl.type.Term(".", [new pl.type.Term("S", []),new pl.type.Term(".", [new pl.type.Term("T", []),new pl.type.Term(".", [new pl.type.Term("U", []),new pl.type.Term(".", [new pl.type.Term("V", []),new pl.type.Term(".", [new pl.type.Term("W", []),new pl.type.Term(".", [new pl.type.Term("X", []),new pl.type.Term(".", [new pl.type.Term("Y", []),new pl.type.Term(".", [new pl.type.Term("Z", []),new pl.type.Term("[]", [])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])]), null)
+			],
+			"format/2": [
+				new pl.type.Rule(new pl.type.Term("format", [new pl.type.Var("Fs"),new pl.type.Var("Args")]), new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("format_", [new pl.type.Var("Fs"),new pl.type.Var("Args")]),new pl.type.Var("Cs")]),new pl.type.Term("maplist", [new pl.type.Term("write", []),new pl.type.Var("Cs")])]))
+			],
+			"format/3": [
+				new pl.type.Rule(new pl.type.Term("format", [new pl.type.Var("Stream"),new pl.type.Var("Fs"),new pl.type.Var("Args")]), new pl.type.Term(",", [new pl.type.Term("phrase", [new pl.type.Term("format_", [new pl.type.Var("Fs"),new pl.type.Var("Args")]),new pl.type.Var("Cs")]),new pl.type.Term("maplist", [new pl.type.Term("write", [new pl.type.Var("Stream")]),new pl.type.Var("Cs")])]))
+			],
+			"unique_variable_names/2": [
+				new pl.type.Rule(new pl.type.Term("unique_variable_names", [new pl.type.Var("Term"),new pl.type.Var("VNs")]), new pl.type.Term(",", [new pl.type.Term("term_variables", [new pl.type.Var("Term"),new pl.type.Var("Vs")]),new pl.type.Term("foldl", [new pl.type.Term("var_name", []),new pl.type.Var("Vs"),new pl.type.Var("VNs"),new pl.type.Num(0, false),new pl.type.Var("_")])]))
+			],
+			"seq/3": [
+				new pl.type.Rule(new pl.type.Term("seq", [new pl.type.Term("[]", []),new pl.type.Var("_32563"),new pl.type.Var("_32563")]), new pl.type.Term("true", [])),
+				new pl.type.Rule(new pl.type.Term("seq", [new pl.type.Term(".", [new pl.type.Var("_32345"),new pl.type.Var("_32332")]),new pl.type.Term(".", [new pl.type.Var("_32345"),new pl.type.Var("_32565")]),new pl.type.Var("_32566")]), new pl.type.Term("seq", [new pl.type.Var("_32332"),new pl.type.Var("_32565"),new pl.type.Var("_32566")]))
+			],
+			"var_name/4": [
+				new pl.type.Rule(new pl.type.Term("var_name", [new pl.type.Var("V"),new pl.type.Term("=", [new pl.type.Var("Name"),new pl.type.Var("V")]),new pl.type.Var("Num0"),new pl.type.Var("Num")]), new pl.type.Term(",", [new pl.type.Term(":", [new pl.type.Term("charsio", []),new pl.type.Term("fabricate_var_name", [new pl.type.Term("numbervars", []),new pl.type.Var("Name"),new pl.type.Var("Num0")])]),new pl.type.Term("is", [new pl.type.Var("Num"),new pl.type.Term("+", [new pl.type.Var("Num0"),new pl.type.Num(1, false)])])]))
+			]
+		};
+	};
+	var exports = ["format_/4", "format/2", "format/3"];
+	var options = function() {
+		return {
+			dependencies: ["lists", "charsio"]
+		};
+	};
+	if(typeof module !== 'undefined') {
+		module.exports = function(p) {
+			pl = p;
+			new pl.type.Module(name, predicates(), exports, options());
+		};
+	} else {
+		new pl.type.Module(name, predicates(), exports, options());
+	}
+})(pl);var pl;
+(function(pl) {
+
+	// Extend Tau Prolog prototypes
+	var extend = function(pl) {
+
+		// Consult a program from a string
+		pl.type.Session.prototype.promiseConsult = function(program, options) {
+			return this.thread.promiseConsult(program, options);
+		};
+
+		pl.type.Thread.prototype.promiseConsult = function(program, options) {
+			var thread = this;
+			return new Promise(function(resolve, reject) {
+				var opts = {};
+				options = options === undefined ? {} : options;
+				opts.context_module = options.context_module;
+				opts.text = options.text;
+				opts.html = options.html;
+				opts.url = options.url;
+				opts.file = options.file;
+				opts.script = options.script;
+				opts.success = resolve;
+				opts.error = reject;
+				thread.consult(program, opts);
+			});
+		};
+
+		// Query goal from a string (without ?-)
+		pl.type.Session.prototype.promiseQuery = function(string) {
+			return this.thread.promiseQuery(string);
+		};
+
+		pl.type.Thread.prototype.promiseQuery = function(string) {
+			var thread = this;
+			return new Promise(function(resolve, reject) {
+				thread.query(string, {
+					success: resolve,
+					error: reject
+				});
+			});
+		};
+
+		// Find next computed answer
+		pl.type.Session.prototype.promiseAnswer = function() {
+			return this.thread.promiseAnswer();
+		};
+
+		pl.type.Thread.prototype.promiseAnswer = function() {
+			var thread = this;
+			return new Promise(function(resolve, reject) {
+				thread.answer({
+					success: resolve,
+					fail: resolve,
+					error: reject,
+					limit: reject
+				});
+			});
+		};
+
+		// Find all computed answers (asynchronous generator function)
+		pl.type.Session.prototype.promiseAnswers = function() {
+			return this.thread.promiseAnswers();
+		};
+		pl.type.Thread.prototype.promiseAnswers = async function*() {
+			while(true) {
+				var answer = await this.promiseAnswer();
+				if(answer !== false)
+					yield answer;
+				else
+					return;
+			}
+		};
+
+	}
+
+	if(typeof module !== 'undefined') {
+		module.exports = function(p) {
+			pl = p;
+			extend(pl);
+		};
+	} else {
+		extend(pl);
+	}
+
+})(pl);var pl;
+(function(pl) {
+
+    var FUTURE_PENDING = 0, FUTURE_FULFILLED = 1, FUTURE_FAILED = 2, FUTURE_REJECTED = 3;
+
+    var predicates = function() {
+        
+        return {
+
+            // future/3
+            "future/3": function(thread, point, atom) {
+                var resolve = atom.args[0], goal = atom.args[1], var_future = atom.args[2];
+                if(!pl.type.is_variable(var_future)) {
+                    thread.throw_error(pl.error.instantiation(atom.indicator));
+                } else if(!pl.type.is_callable(goal)) {
+                    thread.throw_error(pl.error.type("callable", goal, atom.indicator));
+                } else {
+                    var future = new pl.type.Future();
+                    var nthread = new pl.type.Thread(thread.session);
+                    var template = thread.next_free_variable();
+                    thread.session.renamed_variables = {};
+                    var future_goal = new pl.type.Term(",", [new pl.type.Term("call", [goal.rename(thread)]), new pl.type.Term("=", [template, resolve.rename(thread)])]);
+                    nthread.add_goal(future_goal);
+                    var handlers = {
+                        success: function(answer) {
+                            future.done(answer.links[template.id], FUTURE_FULFILLED);
+                        },
+                        error: function(error) {
+                            future.done(error.args[0], FUTURE_REJECTED);
+                        },
+                        fail: function() {
+                            future.done(null, FUTURE_FAILED);
+                        },
+                        limit: function() {
+                            nthread.answer(handlers);
+                        }
+                    };
+                    nthread.answer(handlers);
+                    thread.prepend([new pl.type.State(
+                        point.goal.replace(new pl.type.Term("=", [
+                            var_future,
+                            future
+                        ])),
+                        point.substitution,
+                        point
+                    )]);
+                }
+            },
+
+            // future_done/1
+            "future_done/1": function(thread, point, atom) {
+                var future = atom.args[0];
+                if(pl.type.is_variable(future)) {
+                    thread.throw_error(pl.error.instantiation(atom.indicator));
+                } else if(!pl.type.is_future_object(future)) {
+                    thread.throw_error(pl.error.type("future", future, atom.indicator));
+                } else {
+                    if(future.state !== FUTURE_PENDING) {
+                        thread.success(point);
+                    }
+                }
+            },
+
+            // await/2
+            "await/2": function(thread, point, atom) {
+                var future = atom.args[0], value = atom.args[1];
+                if(pl.type.is_variable(future)) {
+                    thread.throw_error(pl.error.instantiation(atom.indicator));
+                } else if(!pl.type.is_future_object(future)) {
+                    thread.throw_error(pl.error.type("future", future, atom.indicator));
+                } else {
+                    future.then(
+                        function(answer) {
+                            thread.prepend([new pl.type.State(
+                                point.goal.replace(new pl.type.Term("=", [
+                                    value,
+                                    answer
+                                ])),
+                                point.substitution,
+                                point
+                            )]);
+                            thread.again();
+                        },
+                        function(error) {
+                            thread.throw_error(error);
+                            thread.again();
+                        },
+                        function() {
+                            thread.again();
+                        }
+                    );
+                    return true;
+                }
+            },
+
+            // future_all/2
+            "future_all/2": function(thread, point, atom) {
+                var futures = atom.args[0], all = atom.args[1];
+                if(pl.type.is_variable(futures) || !pl.type.is_variable(all)) {
+                    thread.throw_error(pl.error.instantiation(atom.indicator));
+                } else if(!pl.type.is_list(futures)) {
+                    thread.throw_error(pl.error.type("list", futures, atom.indicator));
+                } else {
+                    var arr_futures = [];
+                    var pointer = futures;
+                    while(pl.type.is_term(pointer) && pointer.indicator === "./2") {
+                        var head_future = pointer.args[0];
+                        if(pl.type.is_variable(head_future)) {
+                            thread.throw_error(pl.error.instantiation(atom.indicator));
+                            return;
+                        } else if(!pl.type.is_future_object(head_future)) {
+                            thread.throw_error(pl.error.type("future", head_future, atom.indicator));
+                            return;
+                        }
+                        arr_futures.push(head_future);
+                        pointer = pointer.args[1];
+                    }
+                    if(pl.type.is_variable(pointer)) {
+                        thread.throw_error(pl.error.instantiation(atom.indicator));
+                        return;
+                    } else if(!pl.type.is_empty_list(pointer)) {
+                        thread.throw_error(pl.error.type("list", futures, atom.indicator));
+                        return;
+                    }
+                    var future = new pl.type.Future();
+                    future.expected = arr_futures.length;
+                    var templates = [];
+                    for(var i = 0; i < arr_futures.length; i++) {
+                        arr_futures[i].then(
+                            (function(i) {
+                                return function(answer) {
+                                    templates[i] = answer;
+                                    future.expected--;
+                                    if(future.state === FUTURE_PENDING && future.expected === 0) {
+                                        var list = new pl.type.Term("[]", []);
+                                        for(var j = templates.length-1; j >= 0; j--)
+                                            list = new pl.type.Term(".", [templates[j], list]);
+                                        future.done(list, FUTURE_FULFILLED);
+                                    }
+                                };
+                            })(i),
+                            function(error) {
+                                future.expected--;
+                                future.done(error, FUTURE_REJECTED);
+                            },
+                            function() {
+                                future.expected--;
+                                future.done(null, FUTURE_FAILED);
+                            }
+                        );
+                    }
+                    thread.prepend([new pl.type.State(
+                        point.goal.replace(new pl.type.Term("=", [
+                            all,
+                            future
+                        ])),
+                        point.substitution,
+                        point
+                    )]);
+                }
+            },
+
+            // future_any/2
+            "future_any/2": function(thread, point, atom) {
+                var futures = atom.args[0], any = atom.args[1];
+                if(pl.type.is_variable(futures) || !pl.type.is_variable(any)) {
+                    thread.throw_error(pl.error.instantiation(atom.indicator));
+                } else if(!pl.type.is_list(futures)) {
+                    thread.throw_error(pl.error.type("list", futures, atom.indicator));
+                } else {
+                    var arr_futures = [];
+                    var pointer = futures;
+                    while(pl.type.is_term(pointer) && pointer.indicator === "./2") {
+                        var head_future = pointer.args[0];
+                        if(pl.type.is_variable(head_future)) {
+                            thread.throw_error(pl.error.instantiation(atom.indicator));
+                            return;
+                        } else if(!pl.type.is_future_object(head_future)) {
+                            thread.throw_error(pl.error.type("future", head_future, atom.indicator));
+                            return;
+                        }
+                        arr_futures.push(head_future);
+                        pointer = pointer.args[1];
+                    }
+                    if(pl.type.is_variable(pointer)) {
+                        thread.throw_error(pl.error.instantiation(atom.indicator));
+                        return;
+                    } else if(!pl.type.is_empty_list(pointer)) {
+                        thread.throw_error(pl.error.type("list", futures, atom.indicator));
+                        return;
+                    }
+                    var future = new pl.type.Future();
+                    future.expected = arr_futures.length;
+                    var templates = [];
+                    for(var i = 0; i < arr_futures.length; i++) {
+                        arr_futures[i].then(
+                            function(answer) {
+                                future.expected--;
+                                if(future.state === FUTURE_PENDING) {
+                                    future.done(answer, FUTURE_FULFILLED);
+                                }
+                            },
+                            function(error) {
+                                future.expected--;
+                                future.done(error, FUTURE_REJECTED);
+                            },
+                            function() {
+                                future.expected--;
+                                if(future.expected === 0)
+                                    future.done(null, FUTURE_FAILED);
+                            }
+                        );
+                    }
+                    thread.prepend([new pl.type.State(
+                        point.goal.replace(new pl.type.Term("=", [
+                            any,
+                            future
+                        ])),
+                        point.substitution,
+                        point
+                    )]);
+                }
+            }
+
+        };
+
+    };
+
+    var exports = ["future/3", "await/2", "future_done/1", "future_all/2", "future_any/2"];
+
+    var extend = function(pl) {
+
+        // Is a Future object
+        pl.type.is_future_object = function(obj) {
+            return obj instanceof pl.type.Future;
+        };
+
+        // Ordering relation
+        pl.type.order.push(pl.type.Future);
+
+        // DOM Prolog object
+        pl.type.Future = function() {
+            this.value = null;
+            this.state = FUTURE_PENDING;
+            this.tasks = [];
+        };
+
+        pl.type.Future.prototype.done = function(value, state) {
+            this.value = value;
+            this.state = state;
+            if(state === FUTURE_FULFILLED) {
+                while(this.tasks.length > 0) {
+                    var task = this.tasks.shift();
+                    task.resolve(this.value);
+                }
+            } else if(state === FUTURE_REJECTED) {
+                while(this.tasks.length > 0) {
+                    var task = this.tasks.shift();
+                    task.reject(this.value);
+                }
+            } else if(state === FUTURE_FAILED) {
+                while(this.tasks.length > 0) {
+                    var task = this.tasks.shift();
+                    task.fail();
+                }
+            }
+        }
+
+        pl.type.Future.prototype.then = function(resolve, reject, fail) {
+            if(this.state === FUTURE_FULFILLED)
+                resolve(this.value);
+            else if(this.state === FUTURE_REJECTED)
+                reject(this.value);
+            else if(this.state === FUTURE_FAILED)
+                fail();
+            else
+                this.tasks.push({
+                    resolve: resolve,
+                    reject: reject,
+                    fail: fail
+                });
+        };
+
+        // toString
+        pl.type.Future.prototype.toString = function(options) {
+            if(this.value !== null)
+                return "<future>(" + this.value.toString(options) + ")";
+            return "<future>(pending)";
+        };
+
+        // clone
+        pl.type.Future.prototype.clone = function() {
+            var p = new pl.type.Future();
+            p.state = this.state;
+            p.value = this.value;
+        };
+
+        // equals
+        pl.type.Future.prototype.equals = function(obj) {
+            return obj === this;
+        };
+
+        // rename
+        pl.type.Future.prototype.rename = function(_) {
+            return this;
+        };
+
+        // get variables
+        pl.type.Future.prototype.variables = function() {
+            return [];
+        };
+
+        // apply substitutions
+        pl.type.Future.prototype.apply = function(_) {
+            return this;
+        };
+
+        // unify
+        pl.type.Future.prototype.unify = function(obj, _) {
+            if(obj === this)
+                return new pl.type.Substitution();
+            return null;
+        };
+
+        // interpret
+        pl.type.Future.prototype.interpret = function(indicator) {
+            return pl.error.instantiation(indicator);
+        };
+
+        // compare
+        pl.type.Future.prototype.compare = function(obj) {
+            if(this === obj) {
+                return 0;
+            } else if(this < obj) {
+                return -1;
+            } else {
+                return 1;
+            }
+        };
+
+        // to javascript
+        pl.type.Future.prototype.toJavaScript = function() {
+            if(!Promise)
+                return null;
+            var future = this;
+            return new Promise(function(resolve, reject) {
+                future.then(
+                    function(answer) {
+                        resolve(answer.toJavaScript());
+                    },
+                    function(error) {
+                        reject(error.toJavaScript());
+                    },
+                    function() {
+                        reject(false);
+                    }
+                );
+            });
+        };
+        
+        // from javascript
+        pl.fromJavaScript.test.promise = function(obj) {
+            return Promise && obj instanceof Promise;
+        };
+        pl.fromJavaScript.conversion.promise = function(obj) {
+            var future = new pl.type.Future();
+            obj.then(function(value) {
+                future.done(pl.fromJavaScript.apply(value), FUTURE_FULFILLED);
+            }).catch(function(error) {
+                future.done(pl.fromJavaScript.apply(error), FUTURE_REJECTED);
+            });
+            return future;
+        };
+
+    };
+
+    var options = function() {
+        return {
+            meta_predicates: {
+                // future(?, 0, -)
+                "future/3": new pl.type.Term("future", [new pl.type.Term("?"), new pl.type.Num(0, false), new pl.type.Term("-")])
+            }
+        };
+    };
+
+    if(typeof module !== 'undefined') {
+        module.exports = function(p) {
+            pl = p;
+            extend(pl);
+            new pl.type.Module("concurrent", predicates(), exports, options());
+        };
+    } else {
+        extend(pl);
+        new pl.type.Module("concurrent", predicates(), exports, options());
+    }
+
+})(pl);

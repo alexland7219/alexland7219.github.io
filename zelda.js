@@ -216,8 +216,9 @@ function markDone(button) {
         button.textContent = "Done";
         button.classList.add("btn-success");
         button.classList.remove("btn-danger");
-    
         toggleSpoiler(firstButton, 2)
+
+        removeItem(listItem.getElementsByClassName('spoiler-text')[0].textContent)
     }
 
 }
