@@ -128,7 +128,7 @@ avail(desert_palace___boss) :- can_access(desert_palace), have(power_glove), hav
 
 avail(desert_palace___prize) :- avail(desert_palace___boss).
 
-%% LOCATIONS IN DEATH MOUNTAIN
+%% LOCATIONS IN DEATH MOUNTAIN (LIGHT)
 
 avail(old_man) :- can_access(death_mountain), have(lamp).
 avail(spectacle_rock_cave) :- can_access(death_mountain).
@@ -149,46 +149,69 @@ avail(paradox_cave_lower___middle) :- can_access(east_death_mountain).
 avail(paradox_cave_upper___left) :- can_access(east_death_mountain).
 avail(paradox_cave_upper___right) :- can_access(east_death_mountain).
 
-avail(floating_island) :- can_access(east_death_mountain), have(magic_mirror), have(titans_mitt).
+avail(floating_island) :- can_access(dark_world_death_mountain), have(magic_mirror).
 
+%% LOCATIONS IN TOWER OF HERA
 
+avail(tower_of_hera___big_key_chest) :- can_access(tower_of_hera), have(key_p3), (have(lamp) ; have(fire_rod)).
+avail(tower_of_hera___basement_cage) :- can_access(tower_of_hera).
+avail(tower_of_hera___map_chest) :- can_access(tower_of_hera).
+avail(tower_of_hera___compass_chest) :- can_access(tower_of_hera), have(big_key_p3).
+avail(tower_of_hera___big_chest) :- can_access(tower_of_hera), have(big_key_p3).
+avail(tower_of_hera___boss) :- can_access(tower_of_hera), have(big_key_p3).
+avail(tower_of_hera___prize) :- can_access(tower_of_hera), have(big_key_p3).
 
-%%location(tower_of_hera___big_key_chest).
-%%location(tower_of_hera___basement_cage).
-%%location(tower_of_hera___map_chest).
-%%location(tower_of_hera___compass_chest).
-%%location(tower_of_hera___big_chest).
-%%location(tower_of_hera___boss).
-%%location(tower_of_hera___prize).
-%%location(castle_tower___room_03).
-%%location(castle_tower___dark_maze).
-%%location(superbunny_cave___top).
-%%location(superbunny_cave___bottom).
-%%location(hookshot_cave___top_right).
-%%location(hookshot_cave___top_left).
-%%location(hookshot_cave___bottom_left).
-%%location(hookshot_cave___bottom_right).
-%%location(spike_cave).
-%%location(catfish).
-%%location(pyramid).
-%%location(pyramid_fairy___left).
-%%location(pyramid_fairy___right).
-%%location(brewery).
-%%location(c_shaped_house).
-%%location(chest_game).
-%%location(hammer_pegs).
-%%location(bumper_cave).
-%%location(blacksmith).
-%%location(purple_chest).
-%%location(hype_cave___top).
-%%location(hype_cave___middle_right).
-%%location(hype_cave___middle_left).
-%%location(hype_cave___bottom).
-%%location(stumpy).
-%%location(hype_cave___npc).
-%%location(digging_game).
-%%location(mire_shed___left).
-%%location(mire_shed___right).
+%% LOCATIONS IN CASTLE TOWER
+
+avail(castle_tower___room_03) :- can_access(castle_tower).
+avail(castle_tower___dark_maze) :- can_access(castle_tower), have(key_a1_1), have(lamp).
+
+avail(aganhim) :- can_access(castle_tower), have(key_a1_2), have(lamp), have(fighters_sword).
+
+%% LOCATIONS IN DEATH MOUNTAIN (DARK)
+
+avail(superbunny_cave___top) :- can_access(dark_world_death_mountain).
+avail(superbunny_cave___bottom) :- can_access(dark_world_death_mountain).
+
+avail(hookshot_cave___top_right) :- can_access(dark_world_death_mountain), have(hookshot).
+avail(hookshot_cave___top_left) :- can_access(dark_world_death_mountain), have(hookshot).
+avail(hookshot_cave___bottom_left) :- can_access(dark_world_death_mountain), have(hookshot).
+avail(hookshot_cave___bottom_right) :- can_access(dark_world_death_mountain), (have(hookshot) ; have(pegasus_boots)).
+
+avail(spike_cave) :- can_access(death_mountain), have(hammer), have(power_glove), (have(cape) ; avail(sick_kid) ; have(cane_of_byrna) ; have(half_magic)).
+
+%% LOCATIONS IN DARK WORLD
+
+avail(catfish) :- can_access(dark_world_east), have(power_glove), have(moon_pearl).
+avail(pyramid) :- can_access(dark_world_east).
+
+avail(pyramid_fairy___left) :- can_access(dark_world_south), can_access(dark_world_east), have(crystal_5), have(crystal_6), have(moon_pearl), have(hammer).
+avail(pyramid_fairy___left) :- can_access(dark_world_south), can_access(dark_world_east), have(crystal_5), have(crystal_6), have(moon_pearl), have(magic_mirror), have(aganhim).
+avail(pyramid_fairy___right) :- avail(pyramid_fairy___left).
+
+avail(brewery) :- can_access(dark_world_west).
+avail(c_shaped_house) :- can_access(dark_world_west).
+avail(chest_game) :- can_access(dark_world_west).
+
+avail(hammer_pegs) :- can_access(dark_world_west), have(hammer), have(titans_mitt).
+
+avail(bumper_cave) :- can_access(dark_world_west), have(cape).
+avail(blacksmith) :- can_access(dark_world_west), have(titans_mitt).
+avail(purple_chest) :- avail(blacksmith).
+
+avail(hype_cave___top) :- can_access(dark_world_south).
+avail(hype_cave___middle_right) :- can_access(dark_world_south).
+avail(hype_cave___middle_left) :- can_access(dark_world_south).
+avail(hype_cave___bottom) :- can_access(dark_world_south).
+avail(stumpy) :- can_access(dark_world_south).
+avail(hype_cave___npc) :- can_access(dark_world_south).
+avail(digging_game) :- can_access(dark_world_south).
+
+avail(mire_shed___left) :- can_access(dark_world_mire).
+avail(mire_shed___right) :- can_access(dark_world_mire).
+
+%% LOCATIONS IN DARK PALACE
+
 %%location(palace_of_darkness___shooter_room).
 %%location(palace_of_darkness___big_key_chest).
 %%location(palace_of_darkness___the_arena___ledge).
@@ -328,8 +351,7 @@ can_access(dark_world_south) :- have(aganhim), have(hookshot), (have(flippers) ;
 
 can_access(dark_world_mire) :- have(ocarina_inactive), have(titans_mitt).
 
-can_access(dark_world_death_mountain) :- can_access(death_mountain).    
-%%can_access(dark_world_death_mountain).
+can_access(dark_world_death_mountain) :- can_access(east_death_mountain), have(titans_mitt).
 
 have(_) :- false.
 avail(_) :- false.

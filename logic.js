@@ -7,6 +7,7 @@ const progressionMap = {
     "progressive_armor": ["blue_mail", "red_mail"],
     "progressive_shield": ["fighters_shield", "red_shield", "mirror_shield"],
     "progressive_bow": ["normal_bow", "silver_bow"],
+    "key_a1": ["key_a1_1", "key_a1_2"],
     "bottle": ["bottle_one", "bottle_two"]
 };
 
@@ -116,7 +117,7 @@ function refreshAvail(prologItem) {
 
         const id = ans.split(" = ")[1] // Remove 'X = '
 
-
+        console.log(id)
         const elem = document.getElementById(id);
         elem.classList.add("list-group-item-success")
     }, 250)
