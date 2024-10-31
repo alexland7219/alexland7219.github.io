@@ -68,6 +68,11 @@
         "Link's Uncle",
         "Secret Passage"
     ],
+    "Castle Tower": [
+        "Castle Tower - Room 03",
+        "Castle Tower - Dark Maze",
+        "Aganhim"
+    ],
     "Eastern Palace": [
         "Eastern Palace - Compass Chest",
         "Eastern Palace - Big Chest",
@@ -110,10 +115,6 @@
         "Tower of Hera - Big Chest",
         "Tower of Hera - Boss",
         "Tower of Hera - Prize"
-    ],
-    "Castle Tower": [
-        "Castle Tower - Room 03",
-        "Castle Tower - Dark Maze"
     ],
     "Dark World": [
         "Superbunny Cave - Top",
