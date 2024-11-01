@@ -207,117 +207,146 @@ avail(stumpy) :- can_access(dark_world_south).
 avail(hype_cave___npc) :- can_access(dark_world_south).
 avail(digging_game) :- can_access(dark_world_south).
 
-avail(mire_shed___left) :- can_access(dark_world_mire).
-avail(mire_shed___right) :- can_access(dark_world_mire).
+avail(mire_shed___left) :- can_access(dark_world_mire), have(moon_pearl).
+avail(mire_shed___right) :- can_access(dark_world_mire), have(moon_pearl).
 
 %% LOCATIONS IN DARK PALACE
 
-%%location(palace_of_darkness___shooter_room).
-%%location(palace_of_darkness___big_key_chest).
-%%location(palace_of_darkness___the_arena___ledge).
-%%location(palace_of_darkness___the_arena___bridge).
-%%location(palace_of_darkness___stalfos_basement).
-%%location(palace_of_darkness___map_chest).
-%%location(palace_of_darkness___big_chest).
-%%location(palace_of_darkness___compass_chest).
-%%location(palace_of_darkness___harmless_hellway).
-%%location(palace_of_darkness___dark_basement___left).
-%%location(palace_of_darkness___dark_basement___right).
-%%location(palace_of_darkness___dark_maze___top).
-%%location(palace_of_darkness___dark_maze___bottom).
-%%location(palace_of_darkness___boss).
-%%location(palace_of_darkness___prize).
-%%location(swamp_palace___entrance).
-%%location(swamp_palace___big_chest).
-%%location(swamp_palace___big_key_chest).
-%%location(swamp_palace___map_chest).
-%%location(swamp_palace___west_chest).
-%%location(swamp_palace___compass_chest).
-%%location(swamp_palace___flooded_room___left).
-%%location(swamp_palace___flooded_room___right).
-%%location(swamp_palace___waterfall_room).
-%%location(swamp_palace___boss).
-%%location(swamp_palace___prize).
-%%location(skull_woods___big_chest).
-%%location(skull_woods___big_key_chest).
-%%location(skull_woods___compass_chest).
-%%location(skull_woods___map_chest).
-%%location(skull_woods___bridge_room).
-%%location(skull_woods___pot_prison).
-%%location(skull_woods___pinball_room).
-%%location(skull_woods___boss).
-%%location(skull_woods___prize).
-%%location(thieves_town___attic).
-%%location(thieves_town___big_key_chest).
-%%location(thieves_town___map_chest).
-%%location(thieves_town___compass_chest).
-%%location(thieves_town___ambush_chest).
-%%location(thieves_town___big_chest).
-%%location(thieves_town___blinds_cell).
-%%location(thieves_town___boss).
-%%location(thieves_town___prize).
-%%location(ice_palace___big_key_chest).
-%%location(ice_palace___compass_chest).
-%%location(ice_palace___map_chest).
-%%location(ice_palace___spike_room).
-%%location(ice_palace___freezor_chest).
-%%location(ice_palace___iced_t_room).
-%%location(ice_palace___big_chest).
-%%location(ice_palace___boss).
-%%location(ice_palace___prize).
-%%location(misery_mire___big_chest).
-%%location(misery_mire___main_lobby).
-%%location(misery_mire___big_key_chest).
-%%location(misery_mire___compass_chest).
-%%location(misery_mire___bridge_chest).
-%%location(misery_mire___map_chest).
-%%location(misery_mire___spike_chest).
-%%location(misery_mire___boss).
-%%location(misery_mire___prize).
-%%location(turtle_rock___chain_chomps).
-%%location(turtle_rock___compass_chest).
-%%location(turtle_rock___roller_room___left).
-%%location(turtle_rock___roller_room___right).
-%%location(turtle_rock___big_chest).
-%%location(turtle_rock___big_key_chest).
-%%location(turtle_rock___crystaroller_room).
-%%location(turtle_rock___eye_bridge___bottom_left).
-%%location(turtle_rock___eye_bridge___bottom_right).
-%%location(turtle_rock___eye_bridge___top_left).
-%%location(turtle_rock___eye_bridge___top_right).
-%%location(turtle_rock___boss).
-%%location(turtle_rock___prize).
-%%location(ganons_tower___bobs_torch).
-%%location(ganons_tower___dms_room___top_left).
-%%location(ganons_tower___dms_room___top_right).
-%%location(ganons_tower___dms_room___bottom_left).
-%%location(ganons_tower___dms_room___bottom_right).
-%%location(ganons_tower___randomizer_room___top_left).
-%%location(ganons_tower___randomizer_room___top_right).
-%%location(ganons_tower___randomizer_room___bottom_left).
-%%location(ganons_tower___randomizer_room___bottom_right).
-%%location(ganons_tower___firesnake_room).
-%%location(ganons_tower___map_chest).
-%%location(ganons_tower___big_chest).
-%%location(ganons_tower___hope_room___left).
-%%location(ganons_tower___hope_room___right).
-%%location(ganons_tower___bobs_chest).
-%%location(ganons_tower___tile_room).
-%%location(ganons_tower___compass_room___top_left).
-%%location(ganons_tower___compass_room___top_right).
-%%location(ganons_tower___compass_room___bottom_left).
-%%location(ganons_tower___compass_room___bottom_right).
-%%location(ganons_tower___big_key_chest).
-%%location(ganons_tower___big_key_room___left).
-%%location(ganons_tower___big_key_room___right).
-%%location(ganons_tower___mini_helmasaur_room___left).
-%%location(ganons_tower___mini_helmasaur_room___right).
-%%location(ganons_tower___pre_moldorm_chest).
-%%location(ganons_tower___moldorm_chest).
-%%location(turtle_rock_medallion).
-%%location(misery_mire_medallion).
-%%location(waterfall_bottle).
-%%location(pyramid_bottle).
+avail(palace_of_darkness___shooter_room) :- can_access(palace_of_darkness).
+avail(palace_of_darkness___the_arena___ledge) :- can_access(palace_of_darkness), have(bow).
+avail(palace_of_darkness___the_arena___bridge) :- can_access(palace_of_darkness), have(key_d1_1).
+avail(palace_of_darkness___the_arena___bridge) :- can_access(palace_of_darkness), have(bow), have(hammer).
+
+avail(palace_of_darkness___stalfos_basement) :- avail(palace_of_darkness___the_arena___bridge).
+avail(palace_of_darkness___map_chest) :- can_access(palace_of_darkness), have(bow).
+avail(palace_of_darkness___big_chest) :- avail(palace_of_darkness___dark_maze___top), have(big_key_d1).
+avail(palace_of_darkness___compass_chest) :- can_access(palace_of_darkness), have(key_d1_1), have(key_d1_2).
+avail(palace_of_darkness___compass_chest) :- can_access(palace_of_darkness), have(key_d1_1), have(bow), have(hammer).
+
+avail(palace_of_darkness___big_key_chest) :- can_access(palace_of_darkness), have(key_d1_1), have(key_d1_2).
+avail(palace_of_darkness___big_key_chest) :- have(key_d1_1), can_access(palace_of_darkness), have(bow), have(hammer).
+
+avail(palace_of_darkness___dark_basement___left) :- avail(palace_of_darkness___compass_chest), have(lamp).
+avail(palace_of_darkness___dark_basement___right) :- avail(palace_of_darkness___dark_basement___left).
+avail(palace_of_darkness___dark_maze___top) :- can_access(palace_of_darkness), have(key_d1_1), have(key_d1_2), have(key_d1_3), have(lamp).
+avail(palace_of_darkness___dark_maze___top) :- can_access(palace_of_darkness), have(key_d1_1), have(key_d1_2), have(bow), have(hammer), have(lamp).
+avail(palace_of_darkness___dark_maze___bottom) :- avail(palace_of_darkness___dark_maze___top).
+
+avail(palace_of_darkness___harmless_hellway) :- can_access(palace_of_darkness), have(key_d1_1), have(key_d1_2), have(key_d1_3).
+avail(palace_of_darkness___harmless_hellway) :- can_access(palace_of_darkness), have(key_d1_1), have(key_d1_2), have(bow), have(hammer).
+
+avail(palace_of_darkness___boss) :- can_access(palace_of_darkness), have(bow), have(hammer), have(key_d1_1), have(big_key_d1), have(lamp).
+avail(palace_of_darkness___prize) :- can_access(palace_of_darkness___boss).
+
+%% LOCATIONS IN SWAMP PALACE
+
+avail(swamp_palace___entrance) :- can_access(swamp_palace).
+avail(swamp_palace___big_chest) :- can_access(swamp_palace), have(key_d2), have(hammer), have(big_key_d2).
+avail(swamp_palace___big_key_chest) :- can_access(swamp_palace), have(key_d2), have(hammer).
+avail(swamp_palace___map_chest) :- can_access(swamp_palace), have(key_d2).
+avail(swamp_palace___west_chest) :- can_access(swamp_palace), have(key_d2), have(hammer).
+avail(swamp_palace___compass_chest) :- can_access(swamp_palace), have(key_d2), have(hammer).
+avail(swamp_palace___flooded_room___left) :- can_access(swamp_palace), have(key_d2), have(hammer), have(hookshot).
+avail(swamp_palace___flooded_room___right) :- can_access(swamp_palace), have(key_d2), have(hammer), have(hookshot).
+avail(swamp_palace___waterfall_room) :- can_access(swamp_palace), have(key_d2), have(hammer), have(hookshot).
+avail(swamp_palace___boss) :- can_access(swamp_palace), have(key_d2), have(hammer), have(hookshot).
+avail(swamp_palace___prize) :- avail(swamp_palace___boss).
+
+%% LOCATIONS IN SKULL WOODS
+
+avail(skull_woods___big_chest) :- can_access(skull_woods), have(big_key_d3).
+avail(skull_woods___big_key_chest) :- can_access(skull_woods).
+avail(skull_woods___compass_chest) :- can_access(skull_woods).
+avail(skull_woods___map_chest) :- can_access(skull_woods).
+avail(skull_woods___bridge_room) :- can_access(skull_woods), have(fire_rod).
+avail(skull_woods___pot_prison) :- can_access(skull_woods).
+avail(skull_woods___pinball_room) :- can_access(skull_woods).
+avail(skull_woods___boss) :- can_access(skull_woods), have(fire_rod).
+avail(skull_woods___prize) :- avail(skull_woods___boss).
+
+%% LOCATIONS IN THIEVES' TOWN
+
+avail(thieves_town___attic) :- can_access(thieves_town), have(big_key_d4).
+avail(thieves_town___big_key_chest) :- can_access(thieves_town).
+avail(thieves_town___map_chest) :- can_access(thieves_town).
+avail(thieves_town___compass_chest) :- can_access(thieves_town).
+avail(thieves_town___ambush_chest) :- can_access(thieves_town).
+avail(thieves_town___big_chest) :- can_access(thieves_town), have(big_key_d4), have(key_d4), have(hammer).
+avail(thieves_town___blinds_cell) :- can_access(thieves_town), have(big_key_d4).
+avail(thieves_town___boss) :- can_access(thieves_town), have(big_key_d4).
+avail(thieves_town___prize) :- avail(thieves_town___boss).
+
+%% LOCATIONS IN ICE PALACE
+
+avail(ice_palace___big_key_chest) :- can_access(ice_palace), have(hammer), (have(key_d5_1) ; have(hookshot)).
+avail(ice_palace___compass_chest) :- can_access(ice_palace).
+avail(ice_palace___map_chest) :- can_access(ice_palace), have(hammer), (have(key_d5_1) ; have(hookshot)).
+avail(ice_palace___spike_room) :- can_access(ice_palace), (have(key_d5_1) ; have(hookshot)).
+avail(ice_palace___freezor_chest) :- can_access(ice_palace).
+avail(ice_palace___iced_t_room) :- can_access(ice_palace).
+avail(ice_palace___big_chest) :- can_access(ice_palace), have(big_key_d5).
+avail(ice_palace___boss) :- can_access(ice_palace), have(hammer), have(big_key_d5), have(key_d5_1), have(key_d5_2).
+avail(ice_palace___boss) :- can_access(ice_palace), have(hammer), have(big_key_d5), have(key_d5_1), have(cane_of_somaria).
+avail(ice_palace___prize) :- avail(ice_palace___boss).
+
+%% LOCATIONS MISERY MIRE
+
+avail(misery_mire___big_chest) :- can_access(misery_mire), have(big_key_d6).
+avail(misery_mire___main_lobby) :- can_access(misery_mire), have(key_d6).
+avail(misery_mire___big_key_chest) :- can_access(misery_mire), have(key_d6), (have(lamp) ; have(fire_rod)).
+avail(misery_mire___compass_chest) :- can_access(misery_mire), have(key_d6), (have(lamp) ; have(fire_rod)).
+avail(misery_mire___bridge_chest) :- can_access(misery_mire).
+avail(misery_mire___map_chest) :- can_access(misery_mire).
+avail(misery_mire___spike_chest) :- can_access(misery_mire).
+avail(misery_mire___boss) :- can_access(misery_mire), have(big_key_d6), have(lamp), have(cane_of_somaria).
+avail(misery_mire___prize) :- can_access(misery_mire___boss).
+
+%% LOCATIONS TURTLE ROCK
+
+avail(turtle_rock___chain_chomps) :- can_access(turtle_rock), have(key_d7_1).
+avail(turtle_rock___compass_chest) :- can_access(turtle_rock).
+avail(turtle_rock___roller_room___left) :- can_access(turtle_rock), have(fire_rod).
+avail(turtle_rock___roller_room___right) :- can_access(turtle_rock), have(fire_rod).
+avail(turtle_rock___big_chest) :- can_access(turtle_rock), have(key_d7_2), have(big_key_d7).
+avail(turtle_rock___big_key_chest) :- can_access(turtle_rock), have(key_d7_2).
+avail(turtle_rock___crystaroller_room) :- can_access(turtle_rock), have(key_d7_2), have(big_key_d7).
+avail(turtle_rock___eye_bridge___bottom_left) :- can_access(turtle_rock), have(key_d7_3), have(big_key_d7), have(lamp).
+avail(turtle_rock___eye_bridge___bottom_right) :- can_access(turtle_rock), have(key_d7_3), have(big_key_d7), have(lamp).
+avail(turtle_rock___eye_bridge___top_left) :- can_access(turtle_rock), have(key_d7_3), have(big_key_d7), have(lamp).
+avail(turtle_rock___eye_bridge___top_right) :- can_access(turtle_rock), have(key_d7_3), have(big_key_d7), have(lamp).
+avail(turtle_rock___boss) :- can_access(turtle_rock), have(key_d7_4), have(big_key_d7), have(lamp), have(fire_rod), have(ice_rod).
+avail(turtle_rock___prize) :- avail(turtle_rock___boss).
+
+%% LOCATIONS IN GANON'S CASTLE
+
+avail(ganons_tower___bobs_torch) :- can_access(ganons_tower), have(pegasus_boots).
+avail(ganons_tower___dms_room___top_left) :- can_access(ganons_tower), have(hookshot), have(hammer).
+avail(ganons_tower___dms_room___top_right) :- can_access(ganons_tower), have(hookshot), have(hammer).
+avail(ganons_tower___dms_room___bottom_left) :- can_access(ganons_tower), have(hookshot), have(hammer).
+avail(ganons_tower___dms_room___bottom_right) :- can_access(ganons_tower), have(hookshot), have(hammer).
+avail(ganons_tower___randomizer_room___top_left) :- can_access(ganons_tower), have(hookshot), have(hammer), have(key_a2_1), have(key_a2_2).
+avail(ganons_tower___randomizer_room___top_right) :- can_access(ganons_tower), have(hookshot), have(hammer), have(key_a2_1), have(key_a2_2).
+avail(ganons_tower___randomizer_room___bottom_left) :- can_access(ganons_tower), have(hookshot), have(hammer), have(key_a2_1), have(key_a2_2).
+avail(ganons_tower___randomizer_room___bottom_right) :- can_access(ganons_tower), have(hookshot), have(hammer), have(key_a2_1), have(key_a2_2).
+avail(ganons_tower___firesnake_room) :- can_access(ganons_tower), have(hookshot), have(hammer), have(key_a2_1).
+avail(ganons_tower___map_chest) :- can_access(ganons_tower), have(hammer), have(key_a2_1).
+avail(ganons_tower___big_chest).
+avail(ganons_tower___hope_room___left).
+avail(ganons_tower___hope_room___right).
+avail(ganons_tower___bobs_chest).
+avail(ganons_tower___tile_room).
+avail(ganons_tower___compass_room___top_left).
+avail(ganons_tower___compass_room___top_right).
+avail(ganons_tower___compass_room___bottom_left).
+avail(ganons_tower___compass_room___bottom_right).
+avail(ganons_tower___big_key_chest).
+avail(ganons_tower___big_key_room___left).
+avail(ganons_tower___big_key_room___right).
+avail(ganons_tower___mini_helmasaur_room___left).
+avail(ganons_tower___mini_helmasaur_room___right).
+avail(ganons_tower___pre_moldorm_chest).
+avail(ganons_tower___moldorm_chest).
+
 
 %% SECTIONS FROM LIGHT WORLD
 can_access(tower_of_hera) :- can_access(death_mountain), have(magic_mirror).
@@ -340,18 +369,33 @@ can_access(dark_world_east) :- have(aganhim).
 can_access(dark_world_east) :- have(power_glove), have(hammer).
 can_access(dark_world_east) :- have(titans_mitt), have(flippers).
 
-can_access(dark_world_west) :- have(power_glove), have(hammer).
-can_access(dark_world_west) :- have(titans_mitt).
-can_access(dark_world_west) :- have(aganhim), have(hookshot), (have(flippers) ; have(power_glove) ; have(hammer)).
+can_access(dark_world_west) :- have(power_glove), have(hammer), have(moon_pearl).
+can_access(dark_world_west) :- have(titans_mitt), have(moon_pearl).
+can_access(dark_world_west) :- have(aganhim), have(hookshot), (have(flippers) ; have(power_glove) ; have(hammer)), have(moon_pearl).
 
-can_access(dark_world_south) :- have(power_glove), have(hammer).
-can_access(dark_world_south) :- have(titans_mitt).
-can_access(dark_world_south) :- have(aganhim), have(hammer).
-can_access(dark_world_south) :- have(aganhim), have(hookshot), (have(flippers) ; have(power_glove)).
+can_access(dark_world_south) :- have(power_glove), have(hammer), have(moon_pearl).
+can_access(dark_world_south) :- have(titans_mitt), have(moon_pearl).
+can_access(dark_world_south) :- have(aganhim), have(hammer), have(moon_pearl).
+can_access(dark_world_south) :- have(aganhim), have(hookshot), (have(flippers) ; have(power_glove)), have(moon_pearl).
 
 can_access(dark_world_mire) :- have(ocarina_inactive), have(titans_mitt).
 
-can_access(dark_world_death_mountain) :- can_access(east_death_mountain), have(titans_mitt).
+can_access(dark_world_death_mountain) :- can_access(east_death_mountain), have(titans_mitt), have(moon_pearl).
+
+can_access(palace_of_darkness) :- can_access(dark_world_east), have(moon_pearl).
+can_access(swamp_palace) :- can_access(dark_world_south), have(magic_mirror), have(flippers).
+can_access(skull_woods) :- can_access(dark_world_west).
+can_access(thieves_town) :- can_access(dark_world_west).
+
+can_access(ice_palace) :- have(flippers), have(titans_mitt), have(moon_pearl), have(bombos).
+can_access(ice_palace) :- have(flippers), have(titans_mitt), have(moon_pearl), have(fire_rod).
+
+can_access(misery_mire) :- can_access(dark_world_mire), have(bombos), have(quake), have(ether), have(hookshot), have(moon_pearl).
+can_access(misery_mire) :- can_access(dark_world_mire), have(bombos), have(quake), have(ether), have(pegasus_boots), have(moon_pearl).
+
+can_access(turtle_rock) :- can_access(dark_world_death_mountain), have(cane_of_somaria), have(hammer), have(titans_mitt), have(bombos), have(quake), have(ether).
+
+can_access(ganons_tower) :- can_access(dark_world_death_mountain), have(crystal_1), have(crystal_2), have(crystal_3), have(crystal_4), have(crystal_5), have(crystal_6), have(crystal_7).
 
 have(_) :- false.
 avail(_) :- false.

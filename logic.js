@@ -8,7 +8,11 @@ const progressionMap = {
     "progressive_shield": ["fighters_shield", "red_shield", "mirror_shield"],
     "progressive_bow": ["normal_bow", "silver_bow"],
     "key_a1": ["key_a1_1", "key_a1_2"],
-    "bottle": ["bottle_one", "bottle_two"]
+    "bottle": ["bottle_one", "bottle_two"],
+    "key_d1": ["key_d1_1", "key_d1_2", "key_d1_3", "key_d1_4", "key_d1_5", "key_d1_6"],
+    "key_d5": ["key_d5_1", "key_d5_2", "key_d5_3"],
+    "key_d7": ["key_d7_1", "key_d7_2", "key_d7_3", "key_d7_4"],
+    "key_a2": ["key_a2_1", "key_a2_2", "key_a2_3", "key_a2_4"]
 };
 
 
@@ -24,7 +28,6 @@ async function consultModule() {
     var progText = await program.text();
 
     session.consult(progText)
-
 }
 
 
@@ -34,7 +37,6 @@ function checkProgression(item, isAdding) {
     const currentItems = progressionMap[item];
     let currentIndex = currentItems.findLastIndex(level => itemList.includes(level));
 
-    console.log(currentIndex)
     if (isAdding) {
         const res = currentIndex < currentItems.length - 1 ? currentItems[currentIndex + 1] : currentItems[currentIndex];
         return res;
@@ -117,7 +119,6 @@ function refreshAvail(prologItem) {
 
         const id = ans.split(" = ")[1] // Remove 'X = '
 
-        console.log(id)
         const elem = document.getElementById(id);
         elem.classList.add("list-group-item-success")
     }, 250)

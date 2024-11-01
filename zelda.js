@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             header.classList.add("mb-4")
             header.textContent = section
             new_div.appendChild(header)
-
+            
             const badgeText = badgeNeeded(section)
             if (badgeText != "NO"){
                 const badge = document.createElement("span")
@@ -69,8 +69,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 button_container.appendChild(spoilerSpan)
                 button_container.appendChild(document.createTextNode(" ")); // Instead of innerHTML
                 button_container.appendChild(viewSpoilerButton)
-                button_container.appendChild(document.createTextNode(" ")); // Instead of innerHTML                
-                button_container.appendChild(doneButton)
+                if (section != "Special"){
+                    button_container.appendChild(document.createTextNode(" ")); // Instead of innerHTML                
+                    button_container.appendChild(doneButton)    
+                }
 
                 list_item.appendChild(span)
                 list_item.appendChild(button_container)
